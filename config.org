@@ -16,6 +16,7 @@
   - [[#turn-off-mouse-interface][Turn off mouse interface]]
 - [[#languages][Languages]]
   - [[#c][C++]]
+  - [[#glsl][GLSL]]
   - [[#cmake][CMake]]
   - [[#css--less--scss][CSS – LESS – SCSS]]
   - [[#csv][CSV]]
@@ -234,6 +235,7 @@ LSP. That's where [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]] comes in!
     :commands lsp
     :custom
     (lsp-prefer-flymake nil)
+    (lsp-enable-snippet)
     (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
     (lsp-session-file (expand-file-name (format "%s/emacs/lsp-session-v1" xdg-data))))
 
@@ -242,6 +244,7 @@ LSP. That's where [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]] comes in!
     :custom
     (add-hook 'lsp-mode-hook 'lsp-ui-mode)
     (add-hook 'c++-mode-hook 'flycheck-mode))
+
   (use-package company-lsp
     :commands company-lsp
     :custom
@@ -249,11 +252,11 @@ LSP. That's where [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]] comes in!
     (company-lsp-async t)
     (company-lsp-enable-recompletion t))
 
-  ;(use-package dap-mode
-  ;  :after lsp-mode
-  ;  :config
-  ;  (dap-mode t)
-  ;  (dap-ui-mode t))
+  (use-package dap-mode
+    :after lsp-mode
+    :config
+    (dap-mode t)
+    (dap-ui-mode t))
 #+end_src
 
 Another benefit of using LSP to configure the management of your programming
@@ -338,6 +341,11 @@ to do:
   cmake -H. -BDebug -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=YES
   ln -s Debug/compile_commands.json
 #+end_src
+
+** GLSL
+
+(use-package glsl-mode)
+(use-package company-glsl)
 
 ** CMake
 
