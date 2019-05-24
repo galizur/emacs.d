@@ -344,8 +344,10 @@ to do:
 
 ** GLSL
 
+#+begin_src emacs-lisp :tangle yes
 (use-package glsl-mode)
 (use-package company-glsl)
+#+end_src
 
 ** CMake
 
