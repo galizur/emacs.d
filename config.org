@@ -2290,33 +2290,33 @@ exists as well).
 #+END_QUOTE
 
 #+begin_src emacs-lisp :tangle yes
-  ;(use-package projectile
-  ;  :defer 1
-  ;  :preface
-  ;  (defun my/projectile-compilation-buffers (&optional project)
-  ;    "Get a list of a project's compilation buffers.
-  ;  If PROJECT is not specified the command acts on the current project."
-  ;    (let* ((project-root (or project (projectile-project-root)))
-  ;           (buffer-list (mapcar #'process-buffer compilation-in-progress))
-  ;           (all-buffers (cl-remove-if-not
-  ;                         (lambda (buffer)
-  ;                           (projectile-project-buffer-p buffer project-root))
-  ;                         buffer-list)))
-  ;      (if projectile-buffers-filter-function
-  ;          (funcall projectile-buffers-filter-function all-buffers)
-  ;        all-buffers)))
-  ;  :custom
-  ;  (projectile-cache-file (expand-file-name (format "%s/emacs/projectile.cache" xdg-cache)))
-  ;  (projectile-completion-system 'ivy)
-  ;  (projectile-enable-caching t)
-  ;  (projectile-keymap-prefix (kbd "C-c C-p"))
-  ;  (projectile-known-projects-file (expand-file-name (format "%s/emacs/projectile-bookmarks.eld" xdg-cache)))
-  ;  (projectile-mode-line '(:eval (projectile-project-name)))
-  ;  :config (projectile-global-mode))
+  (use-package projectile
+    :defer 1
+    :preface
+    (defun my/projectile-compilation-buffers (&optional project)
+      "Get a list of a project's compilation buffers.
+    If PROJECT is not specified the command acts on the current project."
+      (let* ((project-root (or project (projectile-project-root)))
+             (buffer-list (mapcar #'process-buffer compilation-in-progress))
+             (all-buffers (cl-remove-if-not
+                           (lambda (buffer)
+                             (projectile-project-buffer-p buffer project-root))
+                           buffer-list)))
+        (if projectile-buffers-filter-function
+            (funcall projectile-buffers-filter-function all-buffers)
+          all-buffers)))
+    :custom
+    (projectile-cache-file (expand-file-name (format "%s/emacs/projectile.cache" xdg-cache)))
+    (projectile-completion-system 'ivy)
+    (projectile-enable-caching t)
+    (projectile-keymap-prefix (kbd "C-c C-p"))
+    (projectile-known-projects-file (expand-file-name (format "%s/emacs/projectile-bookmarks.eld" xdg-cache)))
+    (projectile-mode-line '(:eval (projectile-project-name)))
+    :config (projectile-global-mode))
 
-  ;(use-package counsel-projectile
-  ;  :after (counsel projectile)
-  ;  :config (counsel-projectile-mode 1))
+  (use-package counsel-projectile
+    :after (counsel projectile)
+    :config (counsel-projectile-mode 1))
 #+end_src
 
 ** Recent Files
