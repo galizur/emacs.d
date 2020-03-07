@@ -1,0 +1,11 @@
+*.dap-breakpoints
+*lsp-session-v1
+elpa/
+eshell/
+history
+*.*~
+*.eld
+*.cache
+recentf
+transient/
+*~
