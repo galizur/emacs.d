@@ -9,3 +9,4 @@ history
 recentf
 transient/
 *~
+*.el
