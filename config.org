@@ -23,7 +23,6 @@
   - [[#alert][Alert]]
   - [[#auto-completion][Auto-Completion]]
   - [[#buffers][Buffers]]
-  - [[#dashboard][Dashboard]]
   - [[#dired][Dired]]
   - [[#ending-up][Ending Up]]
   - [[#hydra][Hydra]]
@@ -46,7 +45,6 @@
   - [[#agenda][Agenda]]
   - [[#bullets][Bullets]]
   - [[#capture][Capture]]
-  - [[#clock][Clock]]
   - [[#contacts][Contacts]]
   - [[#customization][Customization]]
   - [[#journal][Journal]]
@@ -357,45 +355,6 @@ Some buffers should not be deleted by accident:
   (add-hook 'after-init-hook #'my/protected-buffers)
 #+END_SRC
 
-** Dashboard
-
-Always good to have a dashboard.
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package dashboard
-    :if (< (length command-line-args) 2)
-    :preface
-    (defun dashboard-load-packages (list-size)
-      (insert (make-string (ceiling (max 0 (- dashboard-banner-length 38)) 5) ? )
-              (format "%d packages loaded in %s" (length package-activated-list) (emacs-init-time))))
-    :custom
-    (dashboard-banner-logo-title "With Great Power Comes Great Responsibility")
-    (dashboard-center-content t)
-    (dashboard-items '((packages)
-                       (agenda)
-                       (projects . 5)))
-    (dashboard-navigator-buttons
-     `(
-       (,(and (display-graphic-p)
-              (all-the-icons-faicon "gitlab" :height 1.2 :v-adjust -0.1))
-        "Homepage"
-        "Browse Homepage"
-        (lambda (&rest _) (browse-url homepage)))
-       (,(and (display-graphic-p)
-              (all-the-icons-material "update" :height 1.2 :v-adjust -0.24))
-        "Update"
-        "Update emacs"
-        (lambda (&rest _) (auto-package-update-now)))))
-    (dashboard-set-file-icons t)
-    (dashboard-set-heading-icons t)
-    (dashboard-set-init-info nil)
-    (dashboard-set-navigator t)
-    (dashboard-startup-banner 'logo)
-    :config
-    (add-to-list 'dashboard-item-generators '(packages . dashboard-load-packages))
-    (dashboard-setup-startup-hook))
-#+END_SRC
-
 ** Dired
 
 Here we fix some defaults for dired.
@@ -437,7 +396,7 @@ The code below, executes =org-babel-tangle= asynchronously when
   (defvar *config-file* (expand-file-name "config.org" user-emacs-directory)
     "The configuration file.")
 
-  (defvar *config-last-change* (nth 5 (file-attributes *config-file*))
+  (defvar *config-last-change* (nth 5 (file-attributes *config-file* user-emacs-directory))
     "Last modification time of the configuration file.")
 
   (defvar *show-async-tangle-results* nil
@@ -605,43 +564,6 @@ Group Flycheck commands.
      "Other"
      (("M" flycheck-manual "manual")
       ("v" flycheck-verify-setup "verify setup"))))
-#+END_SRC
-
-*** Hydra / Go To
-
-Group jump-to-files commands.
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (pretty-hydra-define hydra-go-to-file
-    (:hint nil :color teal :quit-key "q" :title (with-faicon "file-text-o" "Go To" 1 -0.05))
-    ("Agenda"
-     (("ac" (find-file "~/.personal/agenda/contacts.org") "contacts")
-      ("af" (find-file "~/.personal/agenda/findmycat.org") "findmycat")
-      ("ao" (find-file "~/.personal/agenda/organizer.org") "organizer")
-      ("ap" (find-file "~/.personal/agenda/people.org") "people")
-      ("ar" (find-file "~/.personal/agenda/routine.org") "routine")
-      ("as" (find-file "~/.personal/agenda/school.org") "school"))
-     "Config"
-     (("ca" (find-file (format "%s/alacritty/alacritty.yml" xdg-config)) "alacritty")
-      ("cA" (find-file (format "%s/sh/aliases" xdg-config)) "aliases")
-      ("cd" (find-file (format "%s/dunst/dunstrc" xdg-config)))
-      ("ce" (find-file "~/.emacs.d/config.org") "emacs")
-      ("cE" (find-file (format "%s/sh/environ" xdg-config)) "environ")
-      ("ci" (find-file (format "%s/i3/config" xdg-config))"i3")
-      ("cn" (find-file (format "%s/neofetch/config.conf" xdg-config)) "neofetch")
-      ("cp" (find-file (format "%s/polybar/config" xdg-config)) "polybar")
-      ("cq" (find-file (format "%s/qutebrowser/config.py" xdg-config)) "qutebrowser")
-      ("cR" (find-file (format "%s/rofi/config.rasi" xdg-config)) "rofi")
-      ("cr" (find-file (format "%s/ranger/rc.conf" xdg-config)) "ranger")
-      ("cs" (find-file (format "%s/sway/config" xdg-config)) "sway")
-      ("ct" (find-file (format "%s/tmux/tmux.conf" xdg-config)) "tmux")
-      ("cx" (find-file (format "%s/sh/xdg" xdg-config)) "xdg"))
-     "Other"
-     (("ob" (find-file "~/.personal/other/books.org") "book")
-      ("ol" (find-file "~/.personal/other/learning.org") "learning")
-      ("om" (find-file "~/.personal/other/movies.org"))
-      ("op" (find-file "~/.personal/other/purchases.org") "purchase")
-      ("ou" (find-file "~/.personal/other/usb.org") "usb"))))
 #+END_SRC
 
 *** Hydra / Image
@@ -1914,42 +1836,6 @@ information.
         :empty-lines 1))))
 #+END_SRC
 
-** Clock
-
-Being organized is one thing, but being optimal is another. =org-clock= allows
-you to estimate your tasks and time them. This is useful, since with experience,
-you can have a better estimate of the time that needs to be given to each task.
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package org-clock
-    :ensure nil
-    :after org
-    :preface
-    (defun my/org-mode-ask-effort ()
-      "Ask for an effort estimate when clocking in."
-      (unless (org-entry-get (point) "Effort")
-        (let ((effort
-               (completing-read
-                "Effort: "
-                (org-entry-get-multivalued-property (point) "Effort"))))
-          (unless (equal effort "")
-            (org-set-property "Effort" effort)))))
-    :hook (org-clock-in-prepare-hook . my/org-mode-ask-effort)
-    :custom
-    (org-clock-clocktable-default-properties
-     '(:block day :maxlevel 2 :scope agenda :link t :compact t :formula %
-              :step day :fileskip0 t :stepskip0 t :narrow 80
-              :properties ("Effort" "CLOCKSUM" "CLOCKSUM_T" "TODO")))
-    (org-clock-continuously nil)
-    (org-clock-in-switch-to-state "STARTED")
-    (org-clock-out-remove-zero-time-clocks t)
-    (org-clock-persist t)
-    (org-clock-persist-file (expand-file-name (format "%s/emacs/org-clock-save.el" xdg-cache)))
-    (org-clock-persist-query-resume nil)
-    (org-clock-report-include-clocking-task t)
-    (org-show-notification-handler (lambda (msg) (alert msg))))
-#+END_SRC
-
 ** Contacts
 
 The best solution to maintain your contacts. I tend to use =org-contacts= to
@@ -2030,12 +1916,7 @@ With that, I can compile many languages with =org-mode=.
 
   (use-package ob-ledger :ensure nil :after org)
   (use-package ob-makefile :ensure nil :after org)
-  (use-package ob-org :ensure nil :after org)
-
-  (use-package ob-plantuml
-    :ensure nil
-    :after org
-    :custom (org-plantuml-jar-path (expand-file-name (format "%s/plantuml.jar" xdg-lib))))
+(use-package ob-org :ensure nil :after org)
 
   (use-package ob-python :ensure nil :after org)
   (use-package ob-ruby :ensure nil :after org)

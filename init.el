@@ -39,3 +39,17 @@
 (setq gc-cons-threshold (* 2 1000 1000))
 
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (yasnippet-snippets yaml-mode which-key use-package-ensure-system-package undo-tree try toc-org switch-window solaire-mode smartparens react-snippets rainbow-mode rainbow-delimiters pdf-tools paradox org-plus-contrib org-journal org-bullets move-text major-mode-hydra magit lua-mode lsp-ui json-mode ivy-yasnippet ivy-rich ivy-pass ibuffer-projectile hungry-delete gnuplot-mode gnuplot git-timemachine git-gutter flycheck fancy-battery expand-region electric-operator doom-themes doom-modeline dired-subtree dired-narrow delight dashboard dap-mode counsel-projectile company-lsp company-box ccls all-the-icons-ivy alert))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
