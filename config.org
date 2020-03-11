@@ -218,6 +218,18 @@ works optimally.
     :config (add-to-list 'projectile-globally-ignored-directories ".ccls-cache"))
 #+END_SRC
 
+*** Clang-format
+
+Having a consistent and beautiful code-base is paramount to coding
+efficiently. Thus, we need [[https://github.com/SavchenkoValeriy/emacs-clang-format-plus][clang-format+]].
+
+#+BEGIN
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package clang-format+
+    :hook ('c++-mode . clang-format+-mode))
+#+END_SRC
+
 ** Emacs Lisp
 
 #+BEGIN_SRC emacs-lisp :tangle yes
