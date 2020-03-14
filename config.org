@@ -200,34 +200,27 @@ The client can be found at [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]].
 
 ** C++
 
-In order to have a fast and stable environment, using [[#LSP][LSP]] as a client and [[https://github.com/MaskRay/ccls][ccls]] as a server
-works optimally.
-
-=ccls= must be installed with your package manager, so it can be used by GNU Emacs.
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package ccls
-    :after projectile
-    :ensure-system-package ccls
-    :custom
-    (ccls-args nil)
-    (ccls-executable (executable-find "ccls"))
-    (projectile-project-root-files-top-down-recurring
-     (append '("compile_commands.json" ".ccls")
-             projectile-project-root-files-top-down-recurring))
-    :config (add-to-list 'projectile-globally-ignored-directories ".ccls-cache"))
-#+END_SRC
+In order to have a fast and stable environment, using [[#LSP][LSP]] as a client and clangd
+as a server works optimally.
 
 *** Clang-format
 
 Having a consistent and beautiful code-base is paramount to coding
 efficiently. Thus, we need [[https://github.com/SavchenkoValeriy/emacs-clang-format-plus][clang-format+]].
 
-#+BEGIN
-
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package clang-format+
     :hook ('c++-mode . clang-format+-mode))
+#+END_SRC
+
+*** Switching between header and source
+
+GNU Emacs has the function =ff-find-other-file=. For convenience we only need to
+bind it.
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (add-hook 'c-mode-common-hook
+    (lambda()
+      (local-set-key (kbd "C-c ?") 'ff-find-other-file)))
 #+END_SRC
 
 ** Emacs Lisp
