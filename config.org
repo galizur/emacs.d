@@ -97,7 +97,7 @@ For a better user experience of GNU Emacs, here are some default values.
     ad-redefinition-action 'accept
     cursor-in-non-selected-windows t
     display-time-default-load-average nil
-    fill-column 80
+    fill-column 100
     help-window-select t
     indent-tabs-mode nil
     inhibit-startup-screen t
@@ -161,10 +161,6 @@ For this installation, we will be using [[https://github.com/articicestudio/nord
 
   (use-package doom-modeline
     :config (doom-modeline-mode))
-
-  (use-package fancy-battery
-    :after doom-modeline
-    :hook (after-init . fancy-battery-mode))
 
   (use-package solaire-mode
     :custom (solair-mode-remap-fringe t)
@@ -328,6 +324,7 @@ We also use =company= with =company-box= that allows a front-end with icons.
     :delight
     :hook (company-mode . company-box-mode))
 #+END_SRC
+
 ** Buffers
 
 Buffers can quickly become a mess. It is useful to be able to find our way easily.
