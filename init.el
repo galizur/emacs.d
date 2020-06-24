@@ -62,6 +62,8 @@
 (global-hl-line-mode)
 (set-default-coding-systems 'utf-8)
 (show-paren-mode 1)
+(setq backup-directory-alist '(("" . "~/.emacs.d/backup")))
+(setq auto-save-default nil)
 
 ;; Turn off mouse interface
 (when window-system
@@ -76,7 +78,14 @@
 
 ;; Theme
 (use-package doom-themes
-  :config (load-theme 'doom-nord t))
+  :config
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t)
+  (load-theme 'doom-nord t)
+  (doom-themes-visual-bell-config)
+  (setq doom-themes-treemacs-theme "doom-colors")
+  (doom-themes-treemacs-config)
+  (doom-themes-org-config))
 
 (use-package doom-modeline
   :config (doom-modeline-mode))
@@ -86,6 +95,11 @@
   :config
   (solaire-mode-swap-bg)
   (solaire-global-mode +1))
+
+;; Dired sort
+(use-package dired-quick-sort
+  :config
+  (dired-quick-sort-setup))
 
 ;;; Languages
 ;; LSP
@@ -103,42 +117,21 @@
   (dap-mode t)
   (dap-ui-mode t))
 
+;; Meson
+(use-package meson-mode
+  :hook ('meson-mode . company-mode))
+
 ;; C++
-;; Clang-format
-(use-package clang-format+
-  :hook ('c++-mode . clang-format+-mode))
-;; Switching between header and source
-(add-hook 'c-mode-common-hook
-          (lambda()
-            (local-set-key (kbd "C-c ?") 'ff-find-other-file)))
-
-;; CMake
-(use-package cmake-mode
-  :mode ("CMakeLists\\.txt\\'" "\\.cmake\\'"))
-
-(use-package cmake-font-lock
-  :after (cmake-mode)
-  :hook (cmake-mode . cmake-font-lock-activate))
-
-(use-package cmake-ide
-  :after projectile
-  :hook (c++-mode . my/cmake-ide-find-project)
-  :preface
-  (defun my/cmake-ide-find-project ()
-    "Finds the directory of the project for cmake-ide."
-    (with-eval-after-load 'projectile
-      (setq cmake-ide-project-dir (projectile-project-root))
-      (setq cmake-ide-build-dir (concat cmake-ide-project-dir "build")))
-    (setq cmake-ide-compile-command
-          (concat "cd " cmake-ide-build-dir " && cmake .. && make"))
-    (cmake-ide-load-db))
-
-  (defun my/switch-to-compilation-window ()
-    "Switches to the *compilation* buffer after compilation."
-    (other-window 1))
-  :bind ([remap comment-region] . cmake-ide-compile)
-  :init (cmake-ide-setup)
-  :config (advice-add 'cmake-ide-compile :after #'my/switch-to-compilation-window))
+;; (use-package ccls
+;;   :after projectile
+;;   :ensure-system-package ccls
+;;   :custom
+;;   (ccls-args nil)
+;;   (ccls-executable (executable-find "ccls"))
+;;   (projectile-project-root-files-top-down-recurring
+;;    (append '("compile_commands.json" ".ccls")
+;;            projectile-project-root-files-top-down-recurring))
+;;   :config (add-to-list 'projectile-globally-ignored-directories ".ccls-cache"))
 
 ;; GLSL
 (use-package glsl-mode)
@@ -316,6 +309,98 @@
 ;; Alert
 (use-package alert
   :custom (alert-default-style 'libnotify))
+
+;; Treemacs
+(use-package treemacs
+  :ensure t
+  :defer t
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  :config
+  (progn
+    (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
+          treemacs-deferred-git-apply-delay      0.5
+          treemacs-directory-name-transformer    #'identity
+          treemacs-display-in-side-window        t
+          treemacs-eldoc-display                 t
+          treemacs-file-event-delay              5000
+          treemacs-file-extension-regex          treemacs-last-period-regex-value
+          treemacs-file-follow-delay             0.2
+          treemacs-file-name-transformer         #'identity
+          treemacs-follow-after-init             t
+          treemacs-git-command-pipe              ""
+          treemacs-goto-tag-strategy             'refetch-index
+          treemacs-indentation                   2
+          treemacs-indentation-string            " "
+          treemacs-is-never-other-window         nil
+          treemacs-max-git-entries               5000
+          treemacs-missing-project-action        'ask
+          treemacs-move-forward-on-expand        nil
+          treemacs-no-png-images                 nil
+          treemacs-no-delete-other-windows       t
+          treemacs-project-follow-cleanup        nil
+          treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+          treemacs-position                      'left
+          treemacs-recenter-distance             0.1
+          treemacs-recenter-after-file-follow    nil
+          treemacs-recenter-after-tag-follow     nil
+          treemacs-recenter-after-project-jump   'always
+          treemacs-recenter-after-project-expand 'on-distance
+          treemacs-show-cursor                   nil
+          treemacs-show-hidden-files             t
+          treemacs-silent-filewatch              nil
+          treemacs-silent-refresh                nil
+          treemacs-sorting                       'alphabetic-asc
+          treemacs-space-between-root-nodes      t
+          treemacs-tag-follow-cleanup            t
+          treemacs-tag-follow-delay              1.5
+          treemacs-user-mode-line-format         nil
+          treemacs-width                         35)
+
+    ;; The default width and height of the icons is 22 pixels. If you are
+    ;; using a Hi-DPI display, uncomment this to double the icon size.
+    ;;(treemacs-resize-icons 44)
+
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (treemacs-fringe-indicator-mode t)
+    (pcase (cons (not (null (executable-find "git")))
+                 (not (null treemacs-python-executable)))
+      (`(t . t)
+       (treemacs-git-mode 'deferred))
+      (`(t . _)
+       (treemacs-git-mode 'simple))))
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag)))
+
+(use-package treemacs-evil
+  :after treemacs evil
+  :ensure t)
+
+(use-package treemacs-projectile
+  :after treemacs projectile
+  :ensure t)
+
+(use-package treemacs-icons-dired
+  :after treemacs dired
+  :ensure t
+  :config (treemacs-icons-dired-mode))
+
+(use-package treemacs-magit
+  :after treemacs magit
+  :ensure t)
+
+(use-package treemacs-persp
+  :after treemacs persp-mode
+  :ensure t
+  :config (treemacs-set-scope-type 'Perspectives))
 
 ;; Auto-Completion
 (use-package company
@@ -903,11 +988,17 @@ point reaches the beginning or end of the buffer, stop there."
   :custom (sp-escape-quotes-after-insert nil)
   :config (smartparens-global-mode 1))
 
+;; Epub
+(use-package nov
+  :config
+  (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
+
 ;; PDF
 (use-package pdf-tools
   :defer 1
   :magic ("%PDF" . pdf-view-mode)
-  :init (pdf-tools-install :no-query))
+  ;;:init (pdf-tools-install :no-query)
+  )
 
 (use-package pdf-view
   :ensure nil
@@ -1094,7 +1185,8 @@ If PROJECT is not specified the command acts on the current project."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (org-journal org-bullets toc-org org-plus-contrib react-snippets ivy-yasnippet yasnippet-snippets switch-window hungry-delete git-timemachine git-gutter magit git-commit counsel-projectile expand-region pdf-tools smartparens rainbow-delimiters flycheck all-the-icons-ivy ivy-rich ivy-pass counsel which-key undo-tree try rainbow-mode paradox move-text gnuplot-mode gnuplot electric-operator aggressive-indent major-mode-hydra dired-subtree dired-narrow ibuffer-projectile company-box alert sql-indent web-mode ac-php company-tern tern xref-js2 js2-refactor js2-mode prettier-js scss-mode emmet-mode yaml-mode lua-mode json-mode lsp-python-ms glsl-mode cmake-ide cmake-font-lock cmake-mode clang-format+ dap-mode company-lsp lsp-ui lsp-mode solaire-mode doom-modeline doom-themes use-package-ensure-system-package delight use-package))))
+    (speed-type typit meson-mode nov dired-quick-sort org-journal org-bullets toc-org org-plus-contrib react-snippets ivy-yasnippet yasnippet-snippets switch-window hungry-delete git-timemachine git-gutter magit git-commit counsel-projectile expand-region pdf-tools smartparens rainbow-delimiters flycheck all-the-icons-ivy ivy-rich ivy-pass counsel which-key undo-tree try rainbow-mode paradox move-text gnuplot-mode gnuplot electric-operator aggressive-indent major-mode-hydra dired-subtree dired-narrow ibuffer-projectile company-box alert sql-indent web-mode ac-php company-tern tern xref-js2 js2-refactor js2-mode prettier-js scss-mode emmet-mode yaml-mode lua-mode json-mode lsp-python-ms glsl-mode cmake-ide cmake-font-lock cmake-mode clang-format+ dap-mode company-lsp lsp-ui lsp-mode solaire-mode doom-modeline doom-themes use-package-ensure-system-package delight use-package)))
+ '(solair-mode-remap-fringe t t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
