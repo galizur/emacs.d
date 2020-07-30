@@ -274,6 +274,7 @@ custom-file (expand-file-name (format "%s/emacs/custom.el" xdg-data)))
 
 ** C++
 
+#+BEGIN_COMMENT
 #+begin_src emacs-lisp :tangle yes
 (use-package ccls
 :after projectile
@@ -286,6 +287,7 @@ custom-file (expand-file-name (format "%s/emacs/custom.el" xdg-data)))
 projectile-project-root-files-top-down-recurring))
 :config (add-to-list 'projectile-globally-ignored-directories ".ccls-cache"))
 #+end_src
+#+END_COMMENT
 
 ** CSS-LESS-SCSS
 
@@ -1183,7 +1185,7 @@ padding: 45px:
 (("ca" (find-file (format "%s/alacritty/alacritty.yml" xdg-config)) "alacritty")
 ("cA" (find-file (format "%s/sh/aliases" xdg-config)) "aliases")
 ("cd" (find-file (format "%s/dunst/dunstrc" xdg-config)))
-("ce" (find-file "~/.emacs.d/config/org") "emacs")
+("ce" (find-file "~/.emacs.d/config.org") "emacs")
 ("cE" (find-file (format "%s/sh/environ" xdg-config)) "environ")
 ("cn" (find-file (format "%s/neofetch/config.conf" xdg-config)) "neofetch")
 ("cq" (find-file (format "%s/qutebrowser/config.py" xdg-config)) "qutebrowser")
