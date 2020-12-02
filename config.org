@@ -126,7 +126,7 @@
 ** Authentication
 
 #+begin_src emacs-lisp :tangle yes
-  (setq auth-sources '("~/.gnupg/shared/authinfo.gpg"
+  (setq auth-sources '("~/.config/gnupg/shared/authinfo.gpg"
                        "~/.authinfo.gpg"
                        "~/.authinfo"
                        "~/.netrc"))
@@ -697,38 +697,38 @@
 ** Spell Checker
 
 #+begin_src emacs-lisp :tangle yes
-    ;; (use-package ispell
-  ;;     :ensure-system-package (hunspell . "sudo-xbps-install -S hunspell")
-  ;;     :custom
-  ;;     (ispell-local-dictionary "en_US")
-  ;;     (ispell-local-dictionary-alist
-  ;;  '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8)
-  ;;    ("el_GR" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "el_GR") nil utf-8)))
+ (use-package ispell
+     :ensure-system-package (hunspell . "sudo pacman -S hunspell")
+     :custom
+       (ispell-local-dictionary "en_US")
+       (ispell-local-dictionary-alist
+    '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8)
+      ("el" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "el") nil utf-8)))
 
-  ;; (ispell-dictionary "en_US")
-  ;; (ispell-dictionary-alist
-  ;;  '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8)
-  ;;    ("el_GR" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "el_GR") nil utf-8)))
-  ;; (ispell-program-name (executable-find "hunspell"))
-  ;; (ispell-really-hunspell t)
-  ;; (ispell-silently-savep t)
-  ;; :preface
-  ;; (defun my/switch-language ()
-  ;;   "Switches between the English and Greek language."
-  ;;   (interactive)
-  ;;   (let* ((current-dictionaty ispell-current-dictionary)
-  ;;          (new-dictionary (if (string= current-dictionary "el_GR") "en_US" "el_GR")))
-  ;;     (ispell-change-dictionary new-dictionary)
-  ;;     (if (string= new-dictionary "el_GR")
-  ;;         (langtool-switch-default-language "el_GR")
-  ;;       (langtool-switch-default-language "en_US"))
+   (ispell-dictionary "en_US")
+   (ispell-dictionary-alist
+    '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8)
+      ("el" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "el") nil utf-8)))
+   (ispell-program-name (executable-find "hunspell"))
+   (ispell-really-hunspell t)
+   (ispell-silently-savep t)
+   :preface
+   (defun my/switch-language ()
+     "Switches between the English and Greek language."
+     (interactive)
+     (let* ((current-dictionaty ispell-current-dictionary)
+            (new-dictionary (if (string= current-dictionary "el") "en_US" "el")))
+       (ispell-change-dictionary new-dictionary)
+       (if (string= new-dictionary "el")
+           (langtool-switch-default-language "el")
+         (langtool-switch-default-language "en"))
 
-  ;;     ;; Clears all the old errors after switching to the new language
-  ;;     (if (and (boundp 'flyspell-mode) flyspell-mode)
-  ;;         (flyspell-mode 0)
-  ;;       (flyspell-mode 1))
+       ;; Clears all the old errors after switching to the new language
+       (if (and (boundp 'flyspell-mode) flyspell-mode)
+           (flyspell-mode 0)
+         (flyspell-mode 1))
 
-  ;;     (message "Dictionary switched from %s to %s" current-dictionary new-dictionary))))
+       (message "Dictionary switched from %s to %s" current-dictionary new-dictionary))))
 #+end_src
 
 ** Grammar Checker
@@ -2213,7 +2213,7 @@ Install =.vscode-html-languageserver.= through =.npm install --global vscode-htm
 
 #+begin_src emacs-lisp :tangle yes
 (use-package markdown-mode
-  :ensure-system-package (pandoc . "sudo xbps-install -S pandoc")
+  :ensure-system-package (pandoc . "sudo pacman -S pandoc")
   :delight "μ "
   :mode ("\\.markdown\\'" "\\.md\\'")
   :custom (markdown-command "/usr/bin/pandoc"))
@@ -2470,7 +2470,7 @@ Install through composer =.composer require felixfbecker/language-server.=
 *** Ledger
 #+begin_src emacs-lisp :tangle yes
 (use-package ledger-mode
-  :ensure-system-package (ledger . "sudo xbps-install -S ledger")
+  :ensure-system-package (ledger . "sudo pacman -S ledger")
   :mode ("\\.dat\\'"
          "\\.ledger\\'")
   :bind (:map ledger-mode-map
