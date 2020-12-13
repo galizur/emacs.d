@@ -139,7 +139,7 @@
    ad-redefinition-action 'accept
    cursor-in-non-selected-windows t
    display-time-default-load-average nil
-   fill-column 100
+   fill-column 120
    help-window-select t
    indent-tabs-mode nil
    inhibit-startup-screen t
@@ -679,15 +679,15 @@
 ** Flyspell
 
 #+begin_src emacs-lisp :tangle yes
-    (use-package flyspell
-      :diminish
-      :hook ((markdown-mode org-mode text-mode) . flyspell-mode)
-      (prog-mode . flyspell-prog-mode)
-      :custom
-      (flyspell-abbrev-p t)
-      (flyspell-default-dictionary "en_US")
-      (flyspell-issue-message-flag nil)
-      (flyspell-issue-welcome-flag nil))
+  (use-package flyspell
+    :diminish
+    :hook ((markdown-mode org-mode text-mode) . flyspell-mode)
+    (prog-mode . flyspell-prog-mode)
+    :custom
+    (flyspell-abbrev-p t)
+    (flyspell-default-dictionary "en_US")
+    (flyspell-issue-message-flag nil)
+    (flyspell-issue-welcome-flag nil))
 
   (use-package flyspell-correct-ivy
     :after (flyspell ivy)
@@ -697,38 +697,38 @@
 ** Spell Checker
 
 #+begin_src emacs-lisp :tangle yes
- (use-package ispell
-     :ensure-system-package (hunspell . "sudo pacman -S hunspell")
-     :custom
-       (ispell-local-dictionary "en_US")
-       (ispell-local-dictionary-alist
-    '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8)
-      ("el" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "el") nil utf-8)))
+  (use-package ispell
+      :ensure-system-package (hunspell . "yay -S hunspell")
+      :custom
+      (ispell-local-dictionary "en_US")
+      (ispell-local-dictionary-alist
+       '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8)
+         ("el_GR" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "el_GR") nil utf-8)))
 
-   (ispell-dictionary "en_US")
-   (ispell-dictionary-alist
-    '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8)
-      ("el" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "el") nil utf-8)))
-   (ispell-program-name (executable-find "hunspell"))
-   (ispell-really-hunspell t)
-   (ispell-silently-savep t)
-   :preface
-   (defun my/switch-language ()
-     "Switches between the English and Greek language."
-     (interactive)
-     (let* ((current-dictionaty ispell-current-dictionary)
-            (new-dictionary (if (string= current-dictionary "el") "en_US" "el")))
-       (ispell-change-dictionary new-dictionary)
-       (if (string= new-dictionary "el")
-           (langtool-switch-default-language "el")
-         (langtool-switch-default-language "en"))
+      (ispell-dictionary "en_US")
+      (ispell-dictionary-alist
+       '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8)
+         ("el_GR" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "el_GR") nil utf-8)))
+      (ispell-program-name (executable-find "hunspell"))
+      (ispell-really-hunspell t)
+      (ispell-silently-savep t)
+    :preface
+    (defun my/switch-language ()
+      "Switches between the English and Greek language."
+      (interactive)
+      (let* ((current-dictionary ispell-current-dictionary)
+             (new-dictionary (if (string= current-dictionary "el_GR") "en_US" "el_GR")))
+        (ispell-change-dictionary new-dictionary)
+        (if (string= new-dictionary "el_GR")
+            (langtool-switch-default-language "el")
+          (langtool-switch-default-language "en"))
 
-       ;; Clears all the old errors after switching to the new language
-       (if (and (boundp 'flyspell-mode) flyspell-mode)
-           (flyspell-mode 0)
-         (flyspell-mode 1))
+        ;; Clears all the old errors after switching to the new language
+        (if (and (boundp 'flyspell-mode) flyspell-mode)
+            (flyspell-mode 0)
+          (flyspell-mode 1))
 
-       (message "Dictionary switched from %s to %s" current-dictionary new-dictionary))))
+        (message "Dictionary switched from %s to %s" current-dictionary new-dictionary))))
 #+end_src
 
 ** Grammar Checker
@@ -737,7 +737,7 @@
 (use-package langtool
   :diminish
   :custom
-  (langtool-default-language "en_US")
+  (langtool-default-language "en")
   (langtool-disabled-rules '("COMMA_PARENTHESIS_WHITESPACE"
                              "COPYRIGHT"
                              "DASH_RULE"
@@ -746,10 +746,10 @@
                              "UPPERCASE_SENTENCE_START"
                              "WHITESPACE_RULE"))
   (langtool-language-tool-jar (expand-file-name
-                               (format "%s/LanguageTool-5.0/languagetool-commandline.jar" xdg-lib)))
+                               (format "%s/LanguageTool-5.1/languagetool-commandline.jar" xdg-lib)))
   (langtool-language-tool-server-jar (expand-file-name
-                                      (format "%s/LanguageTool-5.0/languagetool-server.jar" xdg-lib)))
-  (langtool-mother-tongue "en_US"))
+                                      (format "%s/LanguageTool-5.1/languagetool-server.jar" xdg-lib)))
+  (langtool-mother-tongue "en"))
 #+end_src
 
 ** History
@@ -918,14 +918,14 @@
 *** Hydra/Ledger
 
 #+begin_src emacs-lisp :tangle yes
-  (pretty-hydra-define hydra-ledger
-    (:hint nil :color teal :quit-key "q" :title (with-faicon "usd" "Ledger" 1 -0.05))
-    ("Action"
-     (("b" ledger-add-transaction "add")
-     ("c" ledger-mode-clean-buffer "clear")
-     ("i" ledger-copy-transaction-at-point "copy")
-     ("s" ledger-delete-current-transaction "delete")
-     ("r" ledger-report "report"))))
+    (pretty-hydra-define hydra-ledger
+      (:hint nil :color teal :quit-key "q" :title (with-faicon "usd" "Ledger" 1 -0.05))
+      ("Action"
+       (("b" ledger-add-transaction "add")
+       ("c" ledger-mode-clean-buffer "clean")
+       ("i" ledger-copy-transaction-at-point "copy")
+       ("s" ledger-delete-current-transaction "delete")
+       ("r" ledger-report "report"))))
 #+end_src
 
 *** Hydra/Magit
@@ -1126,7 +1126,7 @@ _q_ quit        _b_ back
     :ensure nil
     :custom
     (browse-url-browser-function 'browse-url-generic)
-    (browse-rul-generic-program "firefox"))
+    (browse-url-generic-program "firefox"))
 #+end_src
 
 ** Search engine mode
@@ -1781,21 +1781,21 @@ Assets:Cash:Wallet" "Template for cash transaction with ledger.")
 *** LSP
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package lsp-mode
-    :init (setq lsp-keymap-prefix "s-;")
-    :hook (((c-mode c++-mode java-mode json-mode python-mode typescript-mode xlm-mode) . lsp)
-           (lsp-mode . lsp-enable-which-key-integration))
-    :custom
-    (lsp-enable-semantic-highlighting 'overlay)
-    (lsp-clients-clangd-args '("--header-insertion=never"))
-    (lsp-clients-typescript-server-args '("--stdio" "--tsserver-log-file" "/dev/stderr"))
-    (lsp-enable-folding t)
-    (lsp-enable-links t)
-    (lsp-enable-snippet t)
-    (lsp-prefer-capf t)
-    (lsp-prefer-flymake nil)
-    (lsp-session-file (expand-file-name (format "%s/emacs/lsp-session-v1" xdg-data)))
-    (lsp-restart 'auto-restart))
+    (use-package lsp-mode
+      :init (setq lsp-keymap-prefix "s-;")
+      :hook (((c-mode c++-mode java-mode json-mode python-mode typescript-mode xlm-mode) . lsp)
+             (lsp-mode . lsp-enable-which-key-integration))
+      :custom
+      (lsp-enable-semantic-highlighting 'overlay)
+      (lsp-clients-clangd-args '("--header-insertion=never"))
+      (lsp-clients-typescript-server-args '("--stdio" "--tsserver-log-file" "/dev/stderr"))
+      (lsp-enable-folding t)
+      (lsp-enable-links t)
+      (lsp-enable-snippet t)
+      (lsp-prefer-capf t)
+      (lsp-prefer-flymake nil)
+      (lsp-session-file (expand-file-name (format "%s/emacs/lsp-session-v1" xdg-data)))
+      (lsp-restart 'auto-restart))
 #+end_src
 
 *** LSP Dart
@@ -1810,7 +1810,7 @@ Assets:Cash:Wallet" "Template for cash transaction with ledger.")
 #+begin_src emacs-lisp :tangle yes
   (use-package lsp-ui :commands lsp-ui-mode)
   (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
-  (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+  (use-package lsp-treemacs :config (lsp-treemacs-sync-mode 1))
 #+end_src
 
 *** DAP
@@ -1819,10 +1819,7 @@ Assets:Cash:Wallet" "Template for cash transaction with ledger.")
   (use-package dap-mode
     :after lsp-mode
     :config
-    (dap-mode t)
-    (dap-ui-mode 1)
-    (dap-tooltip-mode 1)
-    (dap-ui-controls-mode 1))
+    (dap-auto-configure-mode t))
 #+end_src
 
 *** Meson
@@ -2023,7 +2020,7 @@ Install =.vscode-css-languageserver.= through =.npm install --global vscode-css-
       :defer 0.72
       :custom
       (dart-format-on-save t)
-      (dart-sdk-path "/home/charlie/flutter/bin/")
+      (dart-sdk-path "/opt/flutter/bin/")
       :config
       (add-to-list 'projectile-project-root-files-bottom-up "pubspec.yaml")
       (add-to-list 'projectile-project-root-files-bottom-up "BUILD"))
@@ -2032,7 +2029,7 @@ Install =.vscode-css-languageserver.= through =.npm install --global vscode-css-
       :after dart-mode
       :bind (:map dart-mode-map
              ("C-c C-c" . flutter-run-or-hot-reload))
-      :custom (flutter-sdk-path "/home/charlie/flutter/bin/"))
+      :custom (flutter-sdk-path "/opt/flutter/bin/"))
 
     (use-package flutter-l10n-flycheck
       :after flutter
@@ -2069,6 +2066,8 @@ Install =.vscode-html-languageserver.= through =.npm install --global vscode-htm
 
 *** Java
 
+In order to have a fast and stable environment, I recommend using lsp-java as LSP client and Eclipse JDT Language Server as LSP server.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package lsp-java
   :after lsp
@@ -2095,6 +2094,8 @@ Install =.vscode-html-languageserver.= through =.npm install --global vscode-htm
 #+end_src
 
 *** JavaScript
+
+npm install --save-dev --save-exact prettier
 
 #+begin_src emacs-lisp :tangle yes
 (use-package prettier-js
@@ -2133,13 +2134,13 @@ Install =.vscode-html-languageserver.= through =.npm install --global vscode-htm
     (when (eq major-mode 'json-mode)
       (json-pretty-print-buffer)))
 
-  (defun my/json-array-of-members-on-one-line (encode array)
+  (defun my/json-array-of-numbers-on-one-line (encode array)
     "Prints the arrays of numbers in one line."
     (let* ((json-encoding-pretty-print
             (and json-encoding-pretty-print
                  (not (loop for x across array always (numberp x)))))
            (json-encoding-seperator (if json-encoding-pretty-print "," ", ")))
-      (funcal encode array)))
+      (funcall encode array)))
   :config (advice-add 'json-encode-array :around #'my/json-array-of-numbers-on-one-line))
 #+end_src
 
@@ -2272,6 +2273,8 @@ Install through composer =.composer require felixfbecker/language-server.=
 
 *** PlantUML
 
+It is often useful to be able to make diagrams for various large projects. For the creation of these diagrams, PlantUML remains the best.
+
 #+begin_src emacs-lisp :tangle yes
 (use-package plantuml-mode
   :mode ("\\.plantuml\\'" "\\.puml\\'")
@@ -2279,6 +2282,12 @@ Install through composer =.composer require felixfbecker/language-server.=
 #+end_src
 
 *** Python
+
+In order to have a fast and stable environment, I recommend to use lsp-python-ms as LSP client and
+mspyls as LSP server as mspyls is faster than pyls.
+I use black to reformat my Python buffer. Before use it, don’t forget to install python-black in your system.
+
+To sort my Python imports, py-isort does a good job. Also, don’t forget to install python-isort in your system.
 
 #+begin_src emacs-lisp :tangle yes
 (use-package blacken
@@ -2480,7 +2489,7 @@ Install through composer =.composer require felixfbecker/language-server.=
   (defun my/ledger-save ()
     "Automatically clean the ledger buffer at each save."
     (interactive)
-    (ledger-mode-clear-buffer)
+    (ledger-mode-clean-buffer)
     (save-buffer))
   :custom
   (ledger-clear-whole-transactions t)
