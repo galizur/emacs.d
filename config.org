@@ -36,6 +36,7 @@
   - [[#smart-parentheses][Smart Parentheses]]
   - [[#backups][Backups]]
   - [[#dired][Dired]]
+  - [[#multiple-cursors][Multiple cursors]]
   - [[#recent-files][Recent Files]]
   - [[#move-text][Move text]]
   - [[#navigation][Navigation]]
@@ -135,37 +136,38 @@
 ** Better defaults
 
 #+begin_src emacs-lisp :tangle yes
-  (setq-default
-   ad-redefinition-action 'accept
-   cursor-in-non-selected-windows t
-   display-time-default-load-average nil
-   fill-column 120
-   help-window-select t
-   indent-tabs-mode nil
-   inhibit-startup-screen t
-   initial-scratch-message ""
-   kill-ring-max 128
-   mark-ring-max 128
-   load-prefer-newer t
-   read-process-output-max (* 1024 1024)
-   scroll-conservatively most-positive-fixnum
-   select-enable-clipboard t
-   tab-width 4
-   use-package-always-ensure t
-   user-full-name "Karolos Triantafyllou"
-   user-mail-address "karolos.triantafyllou@gmail.com"
-   vc-follow-symlinks t
-   view-read-only t
-   c-default-style "bsd"
-   c-basic-offset 4)
-  (cd "~/")
-  (column-number-mode 1)
-  (global-display-line-numbers-mode)
-  (display-time-mode 1)
-  (fset 'yes-or-no-p 'y-or-n-p)
-  (global-hl-line-mode)
-  (set-default-coding-systems 'utf-8)
-  (show-paren-mode 1)
+    (setq-default
+     ad-redefinition-action 'accept
+     cursor-in-non-selected-windows t
+     display-time-default-load-average nil
+     fill-column 120
+     help-window-select t
+     indent-tabs-mode nil
+     inhibit-startup-screen t
+     initial-scratch-message ""
+     kill-ring-max 128
+     mark-ring-max 128
+     load-prefer-newer t
+     read-process-output-max (* 1024 1024)
+     scroll-conservatively most-positive-fixnum
+     select-enable-clipboard t
+     tab-width 4
+     use-package-always-ensure t
+     user-full-name "Karolos Triantafyllou"
+     user-mail-address "karolos.triantafyllou@gmail.com"
+     vc-follow-symlinks t
+     view-read-only t
+     c-default-style "bsd"
+     c-basic-offset 4
+     delete-selection-mode 1)
+    (cd "~/")
+    (column-number-mode 1)
+    (global-display-line-numbers-mode)
+    (display-time-mode 1)
+    (fset 'yes-or-no-p 'y-or-n-p)
+    (global-hl-line-mode)
+    (set-default-coding-systems 'utf-8)
+    (show-paren-mode 1)
 #+end_src
 
 ** Better file management with XDG
@@ -600,6 +602,13 @@
   :bind (:map dired-mode-map
               ("<backtab>" . dired-subtree-cycle)
               ("<tab>" . dired-subtree-toggle)))
+#+end_src
+
+** Multiple cursors
+
+#+begin_src emacs-lisp :tangle yes
+    (use-package multiple-cursors
+      :bind (("C-S-c C-S-c" . mc/edit-lines)))
 #+end_src
 
 ** Recent Files
@@ -1763,15 +1772,22 @@ Assets:Cash:Wallet" "Template for cash transaction with ledger.")
 * Linters
 
 #+begin_src emacs-lisp :tangle yes
-      (use-package flycheck
-        :diminish
-        :init (global-flycheck-mode))
+        (use-package flycheck
+          :diminish
+          :init (global-flycheck-mode))
 
-      (use-package flycheck-pos-tip
-        :init (flycheck-pos-tip-mode))
+        (use-package flycheck-pos-tip
+          :init (flycheck-pos-tip-mode))
 
-    (use-package flycheck-color-mode-line
-      :hook (flycheck-mode . flycheck-color-mode-line-mode))
+        (use-package flycheck-color-mode-line
+          :hook (flycheck-mode . flycheck-color-mode-line-mode))
+
+      (use-package flycheck-clang-tidy
+        :after flycheck
+        :hook
+        (flycheck-mode . flycheck-clang-tidy-setup)
+        :custom
+        (flycheck-clang-tidy-executable (executable-find "clang-tidy")))
 #+end_src
 
 * Programming
@@ -1781,21 +1797,22 @@ Assets:Cash:Wallet" "Template for cash transaction with ledger.")
 *** LSP
 
 #+begin_src emacs-lisp :tangle yes
-    (use-package lsp-mode
-      :init (setq lsp-keymap-prefix "s-;")
-      :hook (((c-mode c++-mode java-mode json-mode python-mode typescript-mode xlm-mode) . lsp)
-             (lsp-mode . lsp-enable-which-key-integration))
-      :custom
-      (lsp-enable-semantic-highlighting 'overlay)
-      (lsp-clients-clangd-args '("--header-insertion=never"))
-      (lsp-clients-typescript-server-args '("--stdio" "--tsserver-log-file" "/dev/stderr"))
-      (lsp-enable-folding t)
-      (lsp-enable-links t)
-      (lsp-enable-snippet t)
-      (lsp-prefer-capf t)
-      (lsp-prefer-flymake nil)
-      (lsp-session-file (expand-file-name (format "%s/emacs/lsp-session-v1" xdg-data)))
-      (lsp-restart 'auto-restart))
+  (use-package lsp-mode
+    :init (setq lsp-keymap-prefix "s-;")
+    :hook (((c-mode c++-mode java-mode json-mode python-mode typescript-mode xlm-mode) . lsp)
+           (lsp-mode . lsp-enable-which-key-integration))
+    :custom
+    (lsp-enable-semantic-highlighting 'overlay)
+    (lsp-clients-typescript-server-args '("--stdio" "--tsserver-log-file" "/dev/stderr"))
+  (lsp-clients-clangd-args '("--compile-commands-dir=build-debug" "--clang-tidy" "--cross-file-rename"
+                             "--header-insertion=iwyu" "--suggest-missing-includes" "--header-insertion-decorators" "--folding-ranges"))
+  (lsp-enable-folding t)
+    (lsp-enable-links t)
+    (lsp-enable-snippet t)
+    (lsp-prefer-capf t)
+    (lsp-prefer-flymake nil)
+    (lsp-session-file (expand-file-name (format "%s/emacs/lsp-session-v1" xdg-data)))
+    (lsp-restart 'auto-restart))
 #+end_src
 
 *** LSP Dart
@@ -1957,7 +1974,21 @@ Assets:Cash:Wallet" "Template for cash transaction with ledger.")
 *** C/C++
 
 #+begin_src emacs-lisp :tangle yes
-  (require 'dap-lldb)
+    ;(use-package ccls
+      ;:after projectile
+      ;:ensure-system-package ccls
+      ;:custom
+      ;;(ccls-args "--init=cclsinit.json")
+;      (ccls-args nil)
+ ;     (ccls-executable (executable-find "ccls"))
+      ;;(projectile-project-root-files-top-down-recurring
+      ;;(append '("compile_commands.json" ".ccls")
+      ;;projectile-project-root-files-top-down-recurring))
+  ;    :config (add-to-list 'projectile-globally-ignored-directories ".ccls-cache")
+   ;   (setq ccls-sem-highlight-method 'overlay)
+    ;  (setq ccls-initialization-options '(:compilationDatabaseDirectory "build-debug")))
+
+      (require 'dap-lldb)
 #+end_src
 
 *** Emacs Lisp
