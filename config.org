@@ -40,6 +40,7 @@
   - [[#recent-files][Recent Files]]
   - [[#move-text][Move text]]
   - [[#navigation][Navigation]]
+  - [[#helpful-1][Helpful]]
   - [[#spelling][Spelling]]
   - [[#flyspell][Flyspell]]
   - [[#spell-checker][Spell Checker]]
@@ -91,8 +92,9 @@
 ** Package Sources
 
 #+begin_src emacs-lisp :tangle yes
-  (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+  (setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
                            ("melpa" . "https://melpa.org/packages/")
+                           ("melpa-stable" . "http://stable.melpa.org/packages/")
                            ("org" . "https://orgmode.org/elpa/")))
 #+end_src
 
@@ -163,7 +165,6 @@
     (cd "~/")
     (column-number-mode 1)
     (global-display-line-numbers-mode)
-    (display-time-mode 1)
     (fset 'yes-or-no-p 'y-or-n-p)
     (global-hl-line-mode)
     (set-default-coding-systems 'utf-8)
@@ -172,7 +173,7 @@
 
 ** Better file management with XDG
 
-#+begin_src bash
+#+begin_src shell
   mkdir ~/.cache/emacs ~/.local/share/emacs/
 #+end_src
 
@@ -221,6 +222,10 @@
   (set-fontset-font t 'latin "Noto Sans")
 #+end_src
 
+#+begin_src shell
+  fc-list | grep "Source Code Pro Medium"
+#+end_src
+
 ** Theme
 
 *** Doom Theme
@@ -252,8 +257,15 @@
 #+begin_src emacs-lisp :tangle yes
   (use-package all-the-icons
     :if (display-graphic-p)
+    :commands all-the-icons-install-fonts
     :config (unless (find-font (font-spec :name "all-the-icons"))
               (all-the-icons-install-fonts t)))
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package all-the-icons-dired
+    :if (display-graphic-p)
+    :hook (dired-mode . all-the-icons-dired-mode))
 #+end_src
 
 ** Windows
@@ -273,6 +285,21 @@
            ("C-c j" . windmove-down)
            ("C-c k" . windmove-up)
            ("C-c l" . windmove-right)))
+#+end_src
+
+*** Center Window
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package centered-window
+  :defer 0.8
+  :custom
+  (cwm-centered-window-width 130)
+  (cwm-incremental-padding t)
+  (cwm-incremental-padding-% 2)
+  (cwm-left-fringe-ratio 0)
+  (cwm-frame-internal-border 0)
+  (cwm-use-vertical-padding t)
+  :config (centered-window-mode t))
 #+end_src
 
 *** Switch window
@@ -311,6 +338,7 @@
 #+begin_src emacs-lisp :tangle yes
   (use-package ivy
     :diminish
+    :after ivy-rich
     :bind (("C-x b" . ivy-switch-buffer)
            ("C-x B" . ivy-switch-buffer-other-window)
            ("M-H" . ivy-resume)
@@ -502,10 +530,10 @@
 
 #+begin_src emacs-lisp :tangle yes
   (use-package which-key
-    :init (which-key-mode)
+    :defer 0.2
     :diminish
-    :config
-    (setq which-key-idle-delay 0.5))
+    :custom which-key-idle-delay 0.5
+    :config (which-key-mode))
 #+end_src
 
 ** Helpful
@@ -672,6 +700,21 @@
     :bind ("C-r" . imenu))
 #+end_src
 
+** Helpful
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package helpful
+    :custom
+    (counsel-describe-function-function #'helpful-callable)
+    (counsel-describe-variable-function #'helpful-variable)
+    :bind
+    ([remap describe-function] . helpful-function)
+    ([remap describe-symbol] . helpful-symbol)
+    ([remap describe-variable] . helpful-variable)
+    ([remap describe-command] . helpful-command)
+    ([remap describe-key] . helpful-key))
+#+end_src
+
 ** Spelling
 
 #+begin_src emacs-lisp :tangle yes
@@ -708,6 +751,8 @@
 #+begin_src emacs-lisp :tangle yes
   (use-package ispell
       :ensure-system-package (hunspell . "yay -S hunspell")
+      :init
+      (setenv "LANG" "en_US")
       :custom
       (ispell-local-dictionary "en_US")
       (ispell-local-dictionary-alist
@@ -721,6 +766,7 @@
       (ispell-program-name (executable-find "hunspell"))
       (ispell-really-hunspell t)
       (ispell-silently-savep t)
+      (ispell-extra-args '("--sug-mode=ultra"))
     :preface
     (defun my/switch-language ()
       "Switches between the English and Greek language."
@@ -880,34 +926,37 @@
 *** Hydra/Go To
 
 #+begin_src emacs-lisp :tangle yes
-(pretty-hydra-define hydra-go-to-file
-  (:hint nil :color teal :quit-key "q" :title (with-faicon "file-text-o" "Go To" 1 -0.05))
-  ("Agenda"
-   (("ac" (find-file "~/.personal/agenda/contacts.org") "contacts")
-    ("ao" (find-file "~/.personal/agenda/organizer.org") "organizer")
-    ("ap" (find-file "~/.personal/agenda/people.org") "people")
-    ("ar" (find-file "~/.personal/agenda/routine.org") "routine")
-    ("as" (find-file "~/.personal/agenda/work.org") "work"))
-   "Config"
-   (("ca" (find-file (format "%s/alacritty/alacritty.yml" xdg-config)) "alacritty")
-    ("cA" (find-file (format "%s/sh/aliases" xdg-config)) "aliases")
-    ("cd" (find-file (format "%s/dunst/dunstrc" xdg-config)))
-    ("ce" (find-file "~/.config/emacs/config.org") "emacs")
-    ("cE" (find-file (format "%s/sh/environ" xdg-config)) "environ")
-    ("cn" (find-file (format "%s/neofetch/config.conf" xdg-config)) "neofetch")
-    ("cq" (find-file (format "%s/qutebrowser/config.py" xdg-config)) "qutebrowser")
-    ("cr" (find-file (format "%s/ranger/rc.conf" xdg-config)) "ranger")
-    ("cs" (find-file (format "%s/sway/config" xdg-config)) "sway")
-    ("ct" (find-file (format "%s/tmux/tmux.conf" xdg-config)) "tmux")
-    ("cw" (find-file (format "%s/waybar/config" xdg-config)) "waybar")
-    ("cW" (find-file (format "%s/wofi/config" xdg-config)) "wofi")
-    ("cX" (find-file (format "%s/sh/xdg" xdg-config)) "xdg"))
-   "Other"
-   (("ob" (find-file "~/.personal/other/books.org") "book")
-    ("ol" (find-file "~/.personal/other/learning.org") "learning")
-    ("om" (find-file "~/.personal/other/movies.org"))
-    ("op" (find-file "~/.personal/other/purchases.org") "purchase")
-    ("ou" (find-file "~/.personal/other/usb.org") "usb"))))
+    (pretty-hydra-define hydra-go-to-file
+      (:hint nil :color teal :quit-key "q" :title (with-octicon "file-symlink-file" "Go To" 1 -0.05))
+      ("Agenda"
+       (("ac" (find-file "~/.personal/agenda/contacts.org") "contacts")
+        ("ao" (find-file "~/.personal/agenda/organizer.org") "organizer")
+        ("ap" (find-file "~/.personal/agenda/people.org") "people")
+        ("ar" (find-file "~/.personal/agenda/routine.org") "routine")
+        ("as" (find-file "~/.personal/agenda/work.org") "work"))
+       "Config"
+       (("ca" (find-file (format "%s/alacritty/alacritty.yml" xdg-config)) "alacritty")
+        ("cA" (find-file (format "%s/sh/aliases" xdg-config)) "aliases")
+        ("ce" (find-file "~/.config/emacs/config.org") "emacs")
+        ("cE" (find-file (format "%s/sh/environ" xdg-config)) "environ")
+        ("cn" (find-file (format "%s/neofetch/config.conf" xdg-config)) "neofetch")
+        ("cq" (find-file (format "%s/qutebrowser/config.py" xdg-config)) "qutebrowser")
+        ("cr" (find-file (format "%s/ranger/rc.conf" xdg-config)) "ranger")
+        ("cs" (find-file (format "%s/sway/config" xdg-config)) "sway")
+        ("ct" (find-file (format "%s/tmux/tmux.conf" xdg-config)) "tmux")
+        ("cw" (find-file (format "%s/waybar/config" xdg-config)) "waybar")
+        ("cW" (find-file (format "%s/wofi/config" xdg-config)) "wofi")
+        ("cX" (find-file (format "%s/sh/xdg" xdg-config)) "xdg"))
+       "Notes"
+       (("na" (find-file (format "~/.personal/notes/affirmations.pdf" xdg-config)) "Affirmations"))
+       "Other"
+       (("ob" (find-file "~/.personal/other/books.org") "book")
+        ("ol" (find-file "~/.personal/other/learning.org") "learning")
+        ("om" (find-file "~/.personal/other/movies.org"))
+        ("op" (find-file "~/.personal/other/purchases.org") "purchase")
+        ("ou" (find-file "~/.personal/other/usb.org") "usb")
+        ("os" (find-file "~/.personal/other/short-term-goals.org") "short-term goals")
+        ("ol" (find-file "~/.personal/other/long-term-goals.org") "long-term goals"))))
 #+end_src
 
 *** Hydra/Image
@@ -941,7 +990,7 @@
 
 #+begin_src emacs-lisp :tangle yes
 (pretty-hydra-define hydra-magit
-  (:hint nil :color teal :quit-key "q" :title (with-alltheicon "git" "Magit" 1 -0.05))
+  (:hint nil :color teal :quit-key "q" :title (with-octicon "mark-github" "Magit" 1 -0.05))
   ("Action"
    (("b" magit-blame "blame")
    ("c" magit-clone "clone")
@@ -955,7 +1004,7 @@
 
 #+begin_src emacs-lisp :tangle yes
 (pretty-hydra-define hydra-merge
-  (:hint nil :color pink :quit-key "q" :title (with-alltheicon "git" "Merge" 1 -0.05))
+  (:hint nil :color pink :quit-key "q" :title (with-octicon "mark-github" "Merge" 1 -0.05))
   ("Move"
    (("n" smerge-next "next")
     ("p" smerge-prev "previous"))
@@ -1242,26 +1291,20 @@ _q_ quit        _b_ back
 ** Dashboard
 
 #+begin_src emacs-lisp :tangle yes
-(use-package dashboard
-  :if (< (length command-line-args) 2)
-  :preface
-  (defun dashboard-load-packages (list-size)
-    (insert (make-string (ceiling (max 0 (- dashboard-banner-length 38)) 5) ? )
-            (format "%d packages loaded in %s" (length package-activated-list) (emacs-init-time))))
-  :custom
-  (dashboard-banner-logo-title "With Great Power Comes Great Responsibility")
-  (dashboard-center-content t)
-  (dashboard-items '((packages)
-                     (agenda)
-                     (projects . 5)))
-  (dashboard-set-file-icons t)
-  (dashboard-set-heading-icons t)
-  (dashboard-set-init-info nil)
-  (dashboard-set-navigator t)
-  (dashboard-startup-banner 'logo)
-  :config
-  (add-to-list 'dashboard-item-generators '(packages . dashboard-load-packages))
-  (dashboard-setup-startup-hook))
+  (use-package dashboard
+    :custom
+    (dashboard-banner-logo-title "With Great Power Comes Great Responsibility")
+    (dashboard-center-content t)
+    (dashboard-items '((agenda)
+                       (projects . 5)))
+    (dashboard-projects-switch-function 'counsel-projectile-switch-project-by-name)
+    (dashboard-set-file-icons t)
+    (dashboard-set-footer nil)
+    (dashboard-set-heading-icons t)
+    (dashboard-set-navigator t)
+    (dashboard-startup-banner 'logo)
+    :config
+    (dashboard-setup-startup-hook))
   #+end_src
 
 ** GNU Plot
@@ -1445,7 +1488,6 @@ _q_ quit        _b_ back
                      ("@home" . ?h)
                      ("@phone" . ?p)
                      ("@reading" . ?r)
-                     ("@school" . ?s)
                      ("@work" . ?b)
                      ("@writing" . ?w)
                      ("crypt" . ?C)
@@ -1621,10 +1663,6 @@ Assets:Cash:Wallet" "Template for cash transaction with ledger.")
       my/org-basic-task-template
       :empty-lines 1)
 
-     ("s" "School" entry (file+headline "~/.personal/agenda/school.org" "Tasks"),
-      my/org-basic-task-template
-      :empty-lines 1)
-
      ("t" "Task" entry (file+headline "~/.personal/agenda/organizer.org" "Tasks"),
       my/org-basic-task-template
       :empty-lines 1))))
@@ -1772,22 +1810,22 @@ Assets:Cash:Wallet" "Template for cash transaction with ledger.")
 * Linters
 
 #+begin_src emacs-lisp :tangle yes
-        (use-package flycheck
-          :diminish
-          :init (global-flycheck-mode))
+  (use-package flycheck
+      :diminish
+      :init (global-flycheck-mode))
 
-        (use-package flycheck-pos-tip
-          :init (flycheck-pos-tip-mode))
+    (use-package flycheck-pos-tip
+      :init (flycheck-pos-tip-mode))
 
-        (use-package flycheck-color-mode-line
-          :hook (flycheck-mode . flycheck-color-mode-line-mode))
+    (use-package flycheck-color-mode-line
+      :hook (flycheck-mode . flycheck-color-mode-line-mode))
 
-      (use-package flycheck-clang-tidy
-        :after flycheck
-        :hook
-        (flycheck-mode . flycheck-clang-tidy-setup)
-        :custom
-        (flycheck-clang-tidy-executable (executable-find "clang-tidy")))
+  (use-package flycheck-clang-tidy
+    :after flycheck
+    :hook
+    (flycheck-mode . flycheck-clang-tidy-setup)
+    :custom
+    (flycheck-clang-tidy-executable (executable-find "clang-tidy")))
 #+end_src
 
 * Programming
@@ -1797,22 +1835,24 @@ Assets:Cash:Wallet" "Template for cash transaction with ledger.")
 *** LSP
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package lsp-mode
-    :init (setq lsp-keymap-prefix "s-;")
-    :hook (((c-mode c++-mode java-mode json-mode python-mode typescript-mode xlm-mode) . lsp)
-           (lsp-mode . lsp-enable-which-key-integration))
-    :custom
-    (lsp-enable-semantic-highlighting 'overlay)
-    (lsp-clients-typescript-server-args '("--stdio" "--tsserver-log-file" "/dev/stderr"))
-  (lsp-clients-clangd-args '("--compile-commands-dir=build-debug" "--clang-tidy" "--cross-file-rename"
-                             "--header-insertion=iwyu" "--suggest-missing-includes" "--header-insertion-decorators" "--folding-ranges"))
-  (lsp-enable-folding t)
-    (lsp-enable-links t)
-    (lsp-enable-snippet t)
-    (lsp-prefer-capf t)
-    (lsp-prefer-flymake nil)
-    (lsp-session-file (expand-file-name (format "%s/emacs/lsp-session-v1" xdg-data)))
-    (lsp-restart 'auto-restart))
+      (use-package lsp-mode
+        :commands lsp
+        :init (setq lsp-keymap-prefix "s-;")
+        :hook (((c-mode c++-mode java-mode json-mode python-mode tex-mode typescript-mode xlm-mode) . lsp)
+               (lsp-mode . lsp-enable-which-key-integration))
+        :custom
+        (lsp-enable-semantic-highlighting 'overlay)
+        (lsp-clients-typescript-server-args '("--stdio" "--tsserver-log-file" "/dev/stderr"))
+      (lsp-clients-clangd-args '("--clang-tidy" "--cross-file-rename"
+                                 "--header-insertion=iwyu" "--suggest-missing-includes"
+                                 "--header-insertion-decorators" "--folding-ranges"))
+      (lsp-enable-folding t)
+        (lsp-enable-links t)
+        (lsp-enable-snippet t)
+        (lsp-prefer-capf t)
+        (lsp-prefer-flymake nil)
+        (lsp-session-file (expand-file-name (format "%s/emacs/lsp-session-v1" xdg-data)))
+        (lsp-restart 'auto-restart))
 #+end_src
 
 *** LSP Dart
@@ -1877,9 +1917,12 @@ Assets:Cash:Wallet" "Template for cash transaction with ledger.")
     (projectile-completion-system 'ivy)
     (projectile-enable-caching t)
     (projectile-keymap-prefix (kbd "C-c C-p"))
+    (when (file-directory-p "~/.local/share/git")
+      (projectile-project-search-path '("~/.local/share/git")))
     (projectile-known-projects-file (expand-file-name (format "%s/emacs/projectile-bookmarks.eld" xdg-cache)))
     (projectile-mode-line '(:eval (projectile-project-name)))
-    :config (projectile-mode))
+    (projectile-switch-project-action #'projectile-dired)
+    :config (projectile-global-mode))
 #+end_src
 
 *** Treemacs
@@ -2048,7 +2091,7 @@ Install =.vscode-css-languageserver.= through =.npm install --global vscode-css-
 
 #+begin_src emacs-lisp :tangle yes
     (use-package dart-mode
-      :defer 0.72
+      :defer 2
       :custom
       (dart-format-on-save t)
       (dart-sdk-path "/opt/flutter/bin/")
@@ -2101,8 +2144,8 @@ In order to have a fast and stable environment, I recommend using lsp-java as LS
 
 #+begin_src emacs-lisp :tangle yes
 (use-package lsp-java
-  :after lsp
-  :hook(java-mode . lsp)
+  ;;:after lsp
+  :config (add-hook 'java-mode-hook 'lsp)
   :custom (lsp-java-server-install-dir
            (expand-file-name (format "%s/eclipse.jdt.ls/server" xdg-lib))))
 #+end_src
@@ -2178,47 +2221,55 @@ npm install --save-dev --save-exact prettier
 *** LaTex
 
 #+begin_src emacs-lisp :tangle yes
-(use-package tex
-  :ensure auctex
-  :bind (:map TeX-mode-map
-              ("C-c C-o" . TeX-recenter-output-buffer)
-              ("C-c C-l" . TeX-next-error)
-              ("M-[" . outline-previous-heading)
-              ("M-]" . outline-next-heading))
-  :hook (LaTeX-mode . reftex-mode)
-  :preface
-  (defun my/switch-to-help-window (&optional ARG REPARSE)
-    "Switches to the *TeX Help* buffer after compilation."
-    (other-window 1))
-  :custom
-  (TeX-auto-save t)
-  (TeX-byte-compile t)
-  (TeX-clean-confirm nil)
-  (TeX-master 'dwim)
-  (TeX-parse-self t)
-  (TeX-PDF-mode t)
-  (TeX-source-correlate-mode t)
-  (TeX-view-program-selection '((output-pdf "PDF Tools")))
-  :config
-  (advice-add 'Tex-next-error :after #'my/switch-to-help-window)
-  (advice-add 'Tex-recenter-output-buffer :after #'my/switch-to-help-window)
-  (add-hook 'Tex-after-compilation-finished-functions 'TeX-revert-document-buffer))
+  (use-package tex
+    :ensure auctex
+    :bind (:map TeX-mode-map
+                ("C-c C-o" . TeX-recenter-output-buffer)
+                ("C-c C-l" . TeX-next-error)
+                ("M-[" . outline-previous-heading)
+                ("M-]" . outline-next-heading))
+    :hook (LaTeX-mode . reftex-mode)
+    :preface
+    (defun my/switch-to-help-window (&optional ARG REPARSE)
+      "Switches to the *TeX Help* buffer after compilation."
+      (other-window 1))
+    :custom
+    (TeX-auto-save t)
+    (TeX-byte-compile t)
+    (TeX-clean-confirm nil)
+    (TeX-master 'dwim)
+    (TeX-parse-self t)
+    (TeX-PDF-mode t)
+    (TeX-source-correlate-mode t)
+    (TeX-view-program-selection '((output-pdf "PDF Tools")))
+    :config
+    (advice-add 'Tex-next-error :after #'my/switch-to-help-window)
+    (advice-add 'Tex-recenter-output-buffer :after #'my/switch-to-help-window)
+    (add-hook 'Tex-after-compilation-finished-functions 'TeX-revert-document-buffer))
 
-(use-package bibtex
-  :after auctex
-  :hook (bibtex-mode . my/bibtext-fill-column)
-  :preface
-  (defun my/bibtex-fill-column ()
-    "Ensures that each entry does not exceed 120 characters."
-    (setq fill-column 120)))
+  (use-package lsp-latex
+    :if (executable-find "texlab")
+    :hook (LaTeX-mode . (lambda ()
+                          (require 'lsp-latex)
+                          (lsp)))
+    :custom
+    (lsp-latex-build-on-save t))
 
-(use-package company-auctex
-  :after (acutex company)
-  :config (company-auctex-init))
+  (use-package bibtex
+    :after auctex
+    :hook (bibtex-mode . my/bibtext-fill-column)
+    :preface
+    (defun my/bibtex-fill-column ()
+      "Ensures that each entry does not exceed 120 characters."
+      (setq fill-column 120)))
 
-(use-package company-math :after (auctex company))
+  (use-package company-auctex
+    :after (acutex company)
+    :config (company-auctex-init))
 
-(setq-default TeX-engine 'xetex)
+  (use-package company-math :after (auctex company))
+
+  (setq-default TeX-engine 'xetex)
 #+end_src
 
 **** reftex
@@ -2321,36 +2372,33 @@ I use black to reformat my Python buffer. Before use it, don’t forget to insta
 To sort my Python imports, py-isort does a good job. Also, don’t forget to install python-isort in your system.
 
 #+begin_src emacs-lisp :tangle yes
-(use-package blacken
-  :delight
-  :hook (python-mode . blacken-mode)
-  :custom (blacken-line-length 100))
+  (use-package blacken
+    :delight
+    :hook (python-mode . blacken-mode)
+    :custom (blacken-line-length 100))
 
-(use-package lsp-python-ms
-  :defer 0.3
-  :custom (lsp-python-ms-auto-install-server t))
+  (use-package python
+    :delight "π "
+    :bind (:map python-mode-map
+                ("M-[" . python-nav-backward-block)
+                ("M-]" . python-nav-forward-block))
+    :preface
+    (defun python-remove-unused-imports()
+      "Removes unused imports and unused variables with autoflake."
+      (interactive)
+      (if (executable-find "autoflake")
+          (progn
+            (shell-command (format "autoflake --remove-all-unused-imports -i %s"
+                                   (shell-quote-argument (buffer-file-name))))
+            (revert-buffer t t t))
+        (warn "python-mode: Cannot find autoflake executable."))))
 
-(use-package python
-  :delight "π "
-  :bind (("M-[" . python-nav-backward-block)
-         ("M-]" . python-nav-forward-block))
-  :preface
-  (defun python-remove-unused-imports()
-    "Removes unused imports and unused variables with autoflake."
-    (interactive)
-    (if (executable-find "autoflake")
-        (progn
-          (shell-command (format "autoflake --remove-all-unused-imports -i %s"
-                                 (shell-quote-argument (buffer-file-name))))
-          (revert-buffer t t t))
-      (warn "python-mode: Cannot find autoflake executable."))))
-
-(use-package pyvenv
-  :after python
-  :hook (python-mode . pyvenv-mode)
-  :custom
-  (pyvenv-default-vertual-env-name "env")
-  (pyvenv-mode-line-indication '(pyvenv-virtual-env-name ("[venv:" pyvenv-virtual-env-name "] "))))
+  (use-package pyvenv
+    :after python
+    :hook (python-mode . pyvenv-mode)
+    :custom
+    (pyvenv-default-vertual-env-name "env")
+    (pyvenv-mode-line-indication '(pyvenv-virtual-env-name ("[venv:" pyvenv-virtual-env-name "] "))))
 #+end_src
 
 *** Shell-script
@@ -2648,32 +2696,34 @@ To sort my Python imports, py-isort does a good job. Also, don’t forget to ins
 *** Version Control
 
 #+begin_src emacs-lisp :tangle yes
-(use-package git-commit
-  :after magit
-  :hook (git-commit-mode . my/git-commit-auto-fill-everywhere)
-  :custom (git-commit-summary-max-length 50)
-  :preface
-  (defun my/git-commit-auto-fill-everywhere ()
-    "Ensures that the commit body does not exceed 72 characters."
-    (setq fill-column 72)
-    (setq-local comment-auto-fill-only-comments nil)))
+    (use-package git-commit
+      :after magit
+      :hook (git-commit-mode . my/git-commit-auto-fill-everywhere)
+      :custom (git-commit-summary-max-length 50)
+      :preface
+      (defun my/git-commit-auto-fill-everywhere ()
+        "Ensures that the commit body does not exceed 72 characters."
+        (setq fill-column 72)
+        (setq-local comment-auto-fill-only-comments nil)))
 
-(use-package magit :defer 0.3)
+    (use-package magit :defer 0.3
+      :custom
+      (magit-display-buffer-funtion #'magit-display-buffer-same-window-except-diff-v1))
 
-(use-package smerge-mode
-  :after hydra
-  :hook (magit-diff-visit-file . (lambda ()
-                                   (when smerge-mode
-                                     (hydra-merge/body)))))
+    (use-package smerge-mode
+      :after hydra
+      :hook (magit-diff-visit-file . (lambda ()
+                                       (when smerge-mode
+                                         (hydra-merge/body)))))
 
-(use-package git-gutter
-  :defer 0.3
-  :delight
-  :init (global-git-gutter-mode +1))
+    (use-package git-gutter
+      :defer 0.3
+      :delight
+      :init (global-git-gutter-mode +1))
 
-(use-package git-timemachine
-  :defer 1
-  :delight)
+    (use-package git-timemachine
+      :defer 1
+      :delight)
 #+end_src
 
 *** YASnippet

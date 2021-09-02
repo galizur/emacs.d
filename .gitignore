@@ -10,3 +10,6 @@ recentf
 transient/
 *~
 *.el
+.last-package-update-day
+eclipse.jdt.ls/
+workspace/
