@@ -2425,8 +2425,7 @@ To have a more user-friendly documentation I use the [[https://github.com/Wilfre
   (use-package org-crypt
     :ensure nil
     :init (org-crypt-use-before-save-magic)
-    :custom (org-crypt-key ;Enter key here
-  ))
+    :custom (org-crypt-key E3411ACB78CD104CACADB18CA08BD256FBC9A9B8))
 
   (setq epa-file-encrypt-to "karolos.triantafyllou@gmail.com")
   (setq epa-file-select-keys "auto")
