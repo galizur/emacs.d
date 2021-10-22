@@ -1,5 +1,6 @@
 #+author: Karolos Triantafyllou
 #+title: GNU Emacs Configuration
+#+property: header-args:emacs-lisp :tangle ./config.el :mkdirp yes
 
 * Table of Contents :TOC:
 - [[#emacs-initialization][Emacs Initialization]]
@@ -164,6 +165,7 @@
   (global-hl-line-mode)
   (set-default-coding-systems 'utf-8)
   (show-paren-mode 1)
+  (linum-mode 1)
 #+end_src
 
 ** Better file management with XDG
@@ -872,10 +874,11 @@
     :config (flycheck-add-mode 'javascript-eslint 'js2-mode))
 
   (use-package prettier-js
-      :delight
-      :custom (prettier-js-args '("--print-width" "100"
-                                  "--single-quote" "true"
-                                  "--trailing-comma" "all")))
+    :delight
+    :custom (prettier-js-args '("--print-width" "100"
+                                "--single-quote" "true"
+                                "--trailing-comma" "all")))
+#+end_src
 
   (use-package js2-refactor
     :hook (js2-mode . js2-refactor-mode)
@@ -1592,7 +1595,7 @@ To have a more user-friendly documentation I use the [[https://github.com/Wilfre
     (:hint nil :color teal :quit-key "q" :title (with-octicon "pencil" "Notes" 1 -0.05))
     ("Notes"
      (("c" org-roam-dailies-capture-today "capture")
-      ("C" org-roam-dailies-capture-tomorrow "capture-tomorrow")
+      ("C" org-roam-dailies-capture-tomorrow "capture tomorrow")
       ("g" org-roam-graph "graph")
       ("f" org-roam-node-find "find")
       ("i" org-roam-node-insert "insert"))
@@ -1810,9 +1813,7 @@ To have a more user-friendly documentation I use the [[https://github.com/Wilfre
 
 #+begin_src emacs-lisp
   (use-package webpaste
-    :commands (webpaste-paste-buffer
-               webpaste-paste-buffer-or-region
-               webpaste-paste-region)
+    :defer 0.4
     :bind (("C-c C-p C-b" . webpaste-paste-buffer)
            ("C-c C-p C-p" . webpaste-paste-buffer-or-region)
            ("C-c C-p C-r" . webpaste-paste-region))
@@ -1963,7 +1964,7 @@ To have a more user-friendly documentation I use the [[https://github.com/Wilfre
     (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
   (use-package git-commit
-    :after magit
+    :ensure nil
     :preface
     (defun my/git-commit-auto-fill-everywhere ()
       "Ensures that the commit body does not exceed 72 characters."
@@ -2209,7 +2210,7 @@ To have a more user-friendly documentation I use the [[https://github.com/Wilfre
                 ("x" . my/org-agenda-mark-done))
     :preface
     (defun my/org-agenda-mark-done (&optional arg)
-      "Mark current TODO as done."
+      "Mark the current TODO as done in org-agenda."
       (interactive "P")
       (org-agenda-todo "DONE"))
 
@@ -2434,10 +2435,12 @@ To have a more user-friendly documentation I use the [[https://github.com/Wilfre
 ** Languages
 
 #+begin_src emacs-lisp
+  (use-package jupyter :ensure nil :after org)
   (use-package python :ensure nil :after org)
   (use-package ob-C :ensure nil :after org)
   (use-package ob-css :ensure nil :after org)
   (use-package ob-dot :ensure nil :after org)
+  (use-package ob-ein :ensure nil :after org)
   (use-package ob-emacs-lisp :ensure nil :after org)
   (use-package ob-gnuplot :ensure nil :after org)
   (use-package ob-java :ensure nil :after org)
@@ -2470,32 +2473,35 @@ To have a more user-friendly documentation I use the [[https://github.com/Wilfre
     :init
     (setq org-roam-v2-ack t)
     (setq my/daily-note-filename "%<%Y-%m-%d>.org.gpg"
-          my/daily-not-header "#+title: %<%Y-%m-%d %a>\n\n[[roam:%<%Y-%B>]]\n\n")
+          my/daily-note-header "#+title: %<%Y-%m-%d %a>\n\n[[roam:%<%Y-%B>]]\n\n")
     :custom
     (org-roam-capture-templates
      '(("d" "default" plain "%?"
         :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-                           "#+title: %{title}\n"
-                           :unnarrowed t)))
-     (org-roam-completion-everywhere t)
-     (org-roam-dailies-directory "journal/")
-     (org-roam-dailies-capture-templates
-      `(("d" "default" plain "* %?"
-         :if-new (file+head ,my/daily-note-filename
-                            ,my/daily-not-header)
-         :empty-lines 1)
+                           "#+title: ${title}\n")
+        :unnarrowed t)))
+    (org-roam-completion-everywhere t)
+    (org-roam-dailies-directory "journal/")
+    (org-roam-dailies-capture-templates
+     `(("d" "default" plain
+        "* %?"
+        :if-new (file+head ,my/daily-note-filename
+                           ,my/daily-note-header)
+        :empty-lines 1)
 
-        ("j" "journal" plain "** %<%I:%M %p> :journal:\n\n%?\n\n"
-         :if-new (file+head+olp ,my/daily-note-filename
-                                ,my/daily-note-header
-                                ("Journal"))
-         :empty-lines 1)
-        ("m" "meeting" entry "** %<%I:%M %p> - %^{Meeting Title} :meeting:\n\n%?\n\n"
-         :if-new (file+head+olp ,my/daily-note-filename
-                                ,my/daily-note-header
-                                ("Meetings"))
-         :empty-lines 1)))
-     (org-roam-directory "~/.personal/notes")
-     :custom (org-roam-graph-viewer "/usr/bin/firefox")
-     :config (org-roam-setup)))
+       ("j" "journal" plain
+        "** %<%I:%M %p>  :journal:\n\n%?\n\n"
+        :if-new (file+head+olp ,my/daily-note-filename
+                               ,my/daily-note-header
+                               ("Journal"))
+        :empty-lines 1)
+       ("m" "meeting" entry
+        "** %<%I:%M %p> - %^{Meeting Title}  :meeting:\n\n%?\n\n"
+        :if-new (file+head+olp ,my/daily-note-filename
+                               ,my/daily-note-header
+                               ("Meetings"))
+        :empty-lines 1)))
+    (org-roam-directory "~/.personal/notes")
+    :custom (org-roam-graph-viewer "/usr/bin/qutebrowser")
+    :config (org-roam-setup))
 #+end_src

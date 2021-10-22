@@ -15,3 +15,4 @@ eclipse.jdt.ls/
 workspace/
 bookmarks
 straight/
+*.db
