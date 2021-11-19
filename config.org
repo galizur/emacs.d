@@ -989,7 +989,6 @@ system.
 #+begin_src emacs-lisp
   (use-package markdown-mode
     :delight "μ"
-    :ensure-system-package (pandoc . "yay -S pandoc")
     :mode ("\\.\\(md\\|markdown\\)\\'")
     :custom (markdown-command "/usr/bin/pandoc"))
 #+end_src
@@ -1140,7 +1139,6 @@ buffers are closed.
 #+begin_src emacs-lisp
   (use-package sql-mode
     :ensure nil
-    :ensure-system-package (sqls . "yay -S sqls")
     :mode "\\.sql\\'")
 
   (use-package sql-indent
@@ -1742,7 +1740,6 @@ To have a more user-friendly documentation I use the [[https://github.com/Wilfre
 
 #+begin_src emacs-lisp
   (use-package ledger-mode
-    :ensure-system-package (ledger . "yay -S --noconfirm ledger")
     :mode ("\\.\\(dat\\|ledger\\)\\'")
     :preface
     (defun my/ledger-save ()
