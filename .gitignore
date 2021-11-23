@@ -16,3 +16,4 @@ workspace/
 bookmarks
 straight/
 *.db
+/lisp/
