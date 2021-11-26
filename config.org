@@ -94,7 +94,6 @@
   - [[#clock][Clock]]
   - [[#contacts][Contacts]]
   - [[#faces][Faces]]
-  - [[#encryptiondecryption][Encryption/Decryption]]
   - [[#languages][Languages]]
   - [[#journal][Journal]]
 
@@ -213,7 +212,10 @@
   (set-face-attribute 'default nil :font "Cascadia Code")
   (set-fontset-font t 'latin "Noto Sans")
   (set-fontset-font t 'symbol "Noto Color Emoji")
+  (set-fontset-font t 'symbol "Twitter Color Emoji")
 #+end_src
+
+#+RESULTS:
 
 #+begin_src shell
   fc-list | grep "Cascadia Code"
@@ -1971,7 +1973,7 @@ To have a more user-friendly documentation I use the [[https://github.com/Wilfre
     (projectile-known-projects-file (expand-file-name (format "%s/emacs/projectile-bookmarks.eld" xdg-cache)))
     (projectile-mode-line '(:eval (projectile-project-name)))
     ;; Define the folder containing git repositories (e.g. ~/.local/share/git).
-    (projectile-project-search-path '("~/dev"))
+    (projectile-project-search-path '("~/Programming"))
     (projectile-switch-project-action #'projectile-dired)
     :config (projectile-global-mode))
 
@@ -2181,6 +2183,7 @@ To have a more user-friendly documentation I use the [[https://github.com/Wilfre
 ** First steps
 
 #+begin_src emacs-lisp
+  ;; TODO: fix
   (use-package org
     :ensure org-contrib
     :delight "Θ"
@@ -2278,17 +2281,21 @@ To have a more user-friendly documentation I use the [[https://github.com/Wilfre
     (org-use-speed-commands 'my/org-use-speed-commands-for-headings-and-lists)
     (org-yank-adjusted-subtrees t)
     :config
+    ;; TEST ;;
+    (org-crypt-use-before-save-magic)
+    ;;(org-crypt-key 8F4E3CEEA8CAE6040E88CF2784D878C99B99611D))
     ;;(org-use-speed-commands 1)
     ;;(add-to-list 'org-global-properties '("Effort_ALL" . "0:05 0:15 0:30 1:00 2:00 3:00 4:00"))
-    ;;(add-to-list 'org-speed-commands-user '("$" call-interactively 'org-archive-subtree))
-    ;;(add-to-list 'org-speed-commands-user '("i" call-interactively 'org-clock-in))
-    ;;(add-to-list 'org-speed-commands-user '("o" call-interactively 'org-clock-out))
-    ;;(add-to-list 'org-speed-commands-user '("s" call-interactively 'org-schedule))
-    ;;(add-to-list 'org-speed-commands-user '("x" org-todo "DONE"))
-    ;;(add-to-list 'org-speed-commands-user '("y" org-todo-yesterday "DONE"))
-    (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-    (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
-    (add-to-list 'org-structure-template-alist '("py" . "src python"))
+    ;;(add-to-list 'org-speed-commands '("$" call-interactively 'org-archive-subtree))
+    ;;(add-to-list 'org-speed-commands '("i" call-interactively 'org-clock-in))
+    ;;(add-to-list 'org-speed-commands '("o" call-interactively 'org-clock-out))
+    ;;(add-to-list 'org-speed-commands '("s" call-interactively 'org-schedule))
+    ;;(add-to-list 'org-speed-commands '("x" org-todo "DONE"))
+    ;;(add-to-list 'org-speed-commands '("y" org-todo-yesterday "DONE"))
+    ;;(add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+    ;;(add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+    ;;(add-to-list 'org-structure-template-alist '("py" . "src python"))
+    ;; END TEST ;;
     (advice-add 'org-deadline :after (ignore-args #'org-save-all-org-buffers))
     (advice-add 'org-schedule :after (ignore-args #'org-save-all-org-buffers))
     (advice-add 'org-store-log-note :after (ignore-args #'org-save-all-org-buffers))
@@ -2501,13 +2508,13 @@ To have a more user-friendly documentation I use the [[https://github.com/Wilfre
     :custom
     (alert-user-configuration (quote ((((:category . "org-pomodoro")) libnotify nil))))
     (org-pomodoro-audio-player "/usr/bin/mpv")
-    (org-pomodoro-finished-sound "~/audio/pomodoro_finished.mp3")
+    (org-pomodoro-finished-sound "~/Audio/pomodoro_finished.mp3")
     (org-pomodoro-format " %s")
-    (org-pomodoro-killed-sound "~/audio/pomodoro_killed.mp3")
-    (org-pomodoro-long-break-sound "~/audio/pomodoro_long.mp3")
-    (org-pomodoro-overtime-sound "~/audio/pomodoro_overtime.mp3")
-    (org-pomodoro-short-break-sound "~/audio/pomodoro_short.mp3")
-    (org-pomodoro-start-sound "~/audio/pomodoro_start.mp3")
+    (org-pomodoro-killed-sound "~/Audio/pomodoro_killed.mp3")
+    (org-pomodoro-long-break-sound "~/Audio/pomodoro_long.mp3")
+    (org-pomodoro-overtime-sound "~/Audio/pomodoro_overtime.mp3")
+    (org-pomodoro-short-break-sound "~/Audio/pomodoro_short.mp3")
+    (org-pomodoro-start-sound "~/Audio/pomodoro_start.mp3")
     (org-pomodoro-start-sound-p t))
 #+end_src
 
@@ -2534,13 +2541,16 @@ To have a more user-friendly documentation I use the [[https://github.com/Wilfre
        ("WAITING" . (:foreground "#de935f" :weight bold)))))
 #+end_src
 
-** Encryption/Decryption
+** COMMENT Encryption/Decryption
 
 #+begin_src emacs-lisp
-    (use-package org-crypt
-      :ensure nil
-      :init (org-crypt-use-before-save-magic)
-      :custom (org-crypt-key 8F4E3CEEA8CAE6040E88CF2784D878C99B99611D))
+    ;; TODO: fix
+    ;; TEST ;;
+    ;;(use-package org-crypt
+  ;;    :ensure nil
+      ;;:init (org-crypt-use-before-save-magic)
+      ;;:custom (org-crypt-key 8F4E3CEEA8CAE6040E88CF2784D878C99B99611D))
+  ;; END TEST ;;
 
     (setq epa-file-encrypt-to "karolos.triantafyllou@gmail.com")
     (setq epa-file-select-keys "auto")
