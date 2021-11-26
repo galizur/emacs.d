@@ -2036,7 +2036,7 @@ To have a more user-friendly documentation I use the [[https://github.com/Wilfre
 
 #+begin_src emacs-lisp
   (use-package ligature
-    :load-path "~/.emacs.d/lisp/"
+    :load-path "~/.emacs.d/ligatures/"
     :config
     ;; Enable the "www" ligature in every possible major mode
     (ligature-set-ligatures 't '("www"))
