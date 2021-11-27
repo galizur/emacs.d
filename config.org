@@ -85,7 +85,6 @@
   - [[#whitespaces-and-kill][Whitespaces and Kill]]
   - [[#undo-tree][Undo-tree]]
   - [[#multiple-cursors][Multiple cursors]]
-  - [[#ligatures][Ligatures]]
 - [[#org-mode][Org Mode]]
   - [[#first-steps][First steps]]
   - [[#agenda][Agenda]]
@@ -99,7 +98,11 @@
 
 * Emacs Initialization
 
+This section contains information on how to properly initialize your GNU/Emacs.
+
 ** Package Sources
+
+In order to install packages, we first must configure their sources.
 
 #+begin_src emacs-lisp
   (setq package-archives '(("elpa" . "https://elpa.gnu.org/packages/")
@@ -108,6 +111,8 @@
 #+end_src
 
 ** Package Configuration
+
+=use-package= is used to install and manage packages and configurations. We first install it with the following snippet.
 
 #+begin_src emacs-lisp
   (unless (package-installed-p 'use-package)
@@ -119,6 +124,8 @@
 #+end_src
 
 * Startup
+
+This section contains packages and configurations to get started with GNU/Emacs.
 
 ** Authentication
 
@@ -134,40 +141,43 @@
 
 ** Better defaults
 
+Here are some changed default values, for a better Emacs experience.
+
 #+begin_src emacs-lisp
   (setq-default
-   ad-redefinition-action 'accept
-   cursor-in-non-selected-windows t
-   display-time-default-load-average nil
-   fill-column 120
-   help-window-select t
-   indent-tabs-mode nil
-   inhibit-startup-screen t
-   initial-scratch-message ""
-   kill-ring-max 128
-   mark-ring-max 128
-   load-prefer-newer t
-   read-process-output-max (* 1024 1024)
-   scroll-conservatively most-positive-fixnum
-   select-enable-clipboard t
-   tab-width 4
-   use-package-always-ensure t
-   user-full-name "Karolos Triantafyllou"
-   user-mail-address "karolos.triantafyllou@gmail.com"
-   vc-follow-symlinks t
-   view-read-only t
-   c-basic-offset 4
-   c-default-style "stroustrup"
-   )
-  (column-number-mode 1)
-  (fset 'yes-or-no-p 'y-or-n-p)
-  (global-hl-line-mode)
-  (set-default-coding-systems 'utf-8)
-  (show-paren-mode 1)
-  (linum-mode 1)
+   ad-redefinition-action 'accept                      ; Silence warnings for redefinition.
+   cursor-in-non-selected-windows t                    ; Hide the cursor in inactive windows.
+   display-time-default-load-average nil               ; Don't display the load average.
+   fill-column 120                                     ; Set width for automatic line break/wrap.
+   help-window-select t                                ; Focus on new help windows when opened.
+   indent-tabs-mode nil                                ; Use spaces over tabs.
+   inhibit-startup-screen t                            ; Disable start-up screen.
+   initial-scratch-message ""                          ; Clear the initial *scratch* buffer.
+   kill-ring-max 128                                   ; Maximum length of the kill ring.
+   mark-ring-max 128                                   ; Maximum length of the mark ring.
+   load-prefer-newer t                                 ; Prefer the newest version of a file.
+   read-process-output-max (* 1024 1024)               ; Increase the amount of data reads from the process.
+   scroll-conservatively most-positive-fixnum          ; Always scroll by one line;
+   select-enable-clipboard t                           ; Merge system's and Emacs's clipboards.
+   tab-width 4                                         ; Set the width for tabs.
+   use-package-always-ensure t                         ; Avoid the :ensure keyword for each package.
+   user-full-name "Karolos Triantafyllou"              ; Set the full name of the current user.
+   user-mail-address "karolos.triantafyllou@gmail.com" ; Set the email address of the current user.
+   vc-follow-symlinks t                                ; Always follow the symlinks.
+   view-read-only t                                    ; Always open read-only buffers in view-mode.
+   c-basic-offset 4                                    ; Set the base offset for C/C++.
+   c-default-style "stroustrup")                       ; Set the default style of C/C++
+  (global-display-line-numbers-mode t)                 ; Always show line numbers.
+  (column-number-mode 1)                               ; Show column number.
+  (fset 'yes-or-no-p 'y-or-n-p)                        ; Replace yes/no prompts with y/n.
+  (global-hl-line-mode)                                ; Highlight current line.
+  (set-default-coding-systems 'utf-8)                  ; Set default encoding to UTF-8.
+  (show-paren-mode 1)                                  ; Show matching parentheses.
 #+end_src
 
 ** Better file management with XDG
+
+In order to keep =~/.emacs.d= and =home= folders as clean as possible, we will follow the [[https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html][XDG base directory specification]. GNU Emacs won't create the appropriate folders if they do not exist. So we create them ourselves.
 
 #+begin_src shell
   mkdir ~/.cache/emacs ~/.local/share/emacs/
@@ -184,11 +194,19 @@
     "The XDG data base directory.")
   (defvar xdg-lib (getenv "XDG_LIB_HOME")
     "The XDG lib base directory.")
+#+end_src
 
+Some packages implicitly use the [[https://github.com/tkf/emacs-request]request] package to make HTTP requests. By default, the data for this package is stored int the GNU Emacs directory. We'll change this value to respect the XDG specifications.
+
+#+begin_src emacs-lisp
   (use-package request
     :custom
     (request-storage-directory (expand-file-name (format "%s/emacs/request/" xdg-data))))
+#+end_src
 
+Similarly, GNU Emacs has the built-in =url-cookie= package to maintain cookies. We are changing this value as well.
+
+#+begin_src emacs-lisp
   (use-package url-cookie
     :ensure nil
     :custom
@@ -197,16 +215,20 @@
 
 ** Customization
 
+To avoid overloading the GNU Emacs customization =init.el= file, we add the generated code in a separate file.
+
 #+begin_src emacs-lisp
-    (use-package cus-edit
-      :ensure nil
-      :custom (custom-file (expand-file-name (format "%s/emacs/custom.el" xdg-data)))
-      :config
-      (when (file-exists-p custom-file)
-        (load custom-file t)))
+  (use-package cus-edit
+    :ensure nil
+    :custom (custom-file (expand-file-name (format "%s/emacs/custom.el" xdg-data)))
+    :config
+    (when (file-exists-p custom-file)
+      (load custom-file t)))
 #+end_src
 
 ** Fonts
+
+We use =Cascadia Code= as our font, for it's good legibility and ligature support.
 
 #+begin_src emacs-lisp
   (set-face-attribute 'default nil :font "Cascadia Code")
@@ -215,13 +237,49 @@
   (set-fontset-font t 'symbol "Twitter Color Emoji")
 #+end_src
 
-#+RESULTS:
+We usually have to install the font with the system's package manager. It's also a good idea to check if it has been installed correctly.
 
 #+begin_src shell
   fc-list | grep "Cascadia Code"
 #+end_src
 
+*** Ligatures
+
+Since GNU Emacs doesn't automatically enable ligatures, we have to enable them ourselves.
+
+#+begin_src emacs-lisp
+  (use-package ligature
+    :load-path "~/.emacs.d/ligatures/"
+    :config
+    ;; Enable the "www" ligature in every possible major mode
+    (ligature-set-ligatures 't '("www"))
+    ;; Enable traditional ligature support in eww-mode, if the
+    ;; `variable-pitch' face supports it
+    (ligature-set-ligatures 'eww-mode '("ff" "fi" "ffi"))
+    ;; Enable all Cascadia Code ligatures in programming modes
+    (ligature-set-ligatures 'prog-mode '("|||>" "<|||" "<==>" "<!--" "####" "~~>" "***" "||=" "||>"
+                                         ":::" "::=" "=:=" "===" "==>" "=!=" "=>>" "=<<" "=/=" "!=="
+                                         "!!." ">=>" ">>=" ">>>" ">>-" ">->" "->>" "-->" "---" "-<<"
+                                         "<~~" "<~>" "<*>" "<||" "<|>" "<$>" "<==" "<=>" "<=<" "<->"
+                                         "<--" "<-<" "<<=" "<<-" "<<<" "<+>" "</>" "###" "#_(" "..<"
+                                         "..." "+++" "/==" "///" "_|_" "www" "&&" "^=" "~~" "~@" "~="
+                                         "~>" "~-" "**" "*>" "*/" "||" "|}" "|]" "|=" "|>" "|-" "{|"
+                                         "[|" "]#" "::" ":=" ":>" ":<" "$>" "==" "=>" "!=" "!!" ">:"
+                                         ">=" ">>" ">-" "-~" "-|" "->" "--" "-<" "<~" "<*" "<|" "<:"
+                                         "<$" "<=" "<>" "<-" "<<" "<+" "</" "#{" "#[" "#:" "#=" "#!"
+                                         "##" "#(" "#?" "#_" "%%" ".=" ".-" ".." ".?" "+>" "++" "?:"
+                                         "?=" "?." "??" ";;" "/*" "/=" "/>" "//" "__" "~~" "(*" "*)"
+                                         "\\\\" "://"))
+    ;; Enables ligature checks globally in all buffers. You can also do it
+    ;; per mode with `ligature-mode'.
+    (global-ligature-mode t))
+#+end_src
+
 ** LSP
+
+Using LSP (Language Server Protocol) to configure the management of our programming languages, means that LSP servers can be used by other text editors, increasing the contribution to these packages.
+
+[[https://github.com/emacs-lsp/lsp-mode][lsp-mode] can be used with multiple LSP servers, making it perfect for our use.
 
 #+begin_src emacs-lisp
   (use-package lsp-mode
@@ -236,20 +294,30 @@
     (lsp-keymap-prefix "C-c ;")
     (lsp-session-file (expand-file-name (format "%s/emacs/lsp-session-v1" xdg-data)))
     (read-process-output-max (* 1024 1024)))
+  #+end_src
 
+  =lsp-ui= is used to get information when hovering over a variable or function.
+
+#+begin_src emacs-lisp
   (use-package lsp-ui
     :hook (lsp-mode . lsp-ui-mode))
+#+end_src
 
+When we encounter programming errors, we can use the minibuffer to navigate through said errors. Since we are going to be using =consult=, =consult-lsp= is perfect for this situation.
+
+#+begin_src emacs-lisp
   (use-package consult-lsp
-      :commands (consult-lsp-diagnostics consult-lsp-symbols))
+    :commands (consult-lsp-diagnostics consult-lsp-symbols))
+#+end_src
 
+Finally, we will need a debugger at some point. [[https://github.com/emacs-lsp/dap-mode][dap-mode] uses the Debug Adapter Protocol for communication between the client and Debug Server.
+
+#+begin_src emacs-lisp
   (use-package dap-mode
-      :after lsp-mode
-      :config
-      (dap-mode t)
-      (dap-ui-mode t))
-
-  (require 'dap-lldb)
+    :after lsp-mode
+    :config
+    (dap-mode t)
+    (dap-ui-mode t))
 #+end_src
 
 ** Meson
@@ -2146,36 +2214,6 @@ To have a more user-friendly documentation I use the [[https://github.com/Wilfre
 #+begin_src emacs-lisp
   (use-package multiple-cursors
     :bind (("C-S-c C-S-c" . mc/edit-lines)))
-#+end_src
-
-** Ligatures
-
-#+begin_src emacs-lisp
-  (use-package ligature
-    :load-path "~/.emacs.d/ligatures/"
-    :config
-    ;; Enable the "www" ligature in every possible major mode
-    (ligature-set-ligatures 't '("www"))
-    ;; Enable traditional ligature support in eww-mode, if the
-    ;; `variable-pitch' face supports it
-    (ligature-set-ligatures 'eww-mode '("ff" "fi" "ffi"))
-    ;; Enable all Cascadia Code ligatures in programming modes
-    (ligature-set-ligatures 'prog-mode '("|||>" "<|||" "<==>" "<!--" "####" "~~>" "***" "||=" "||>"
-                                         ":::" "::=" "=:=" "===" "==>" "=!=" "=>>" "=<<" "=/=" "!=="
-                                         "!!." ">=>" ">>=" ">>>" ">>-" ">->" "->>" "-->" "---" "-<<"
-                                         "<~~" "<~>" "<*>" "<||" "<|>" "<$>" "<==" "<=>" "<=<" "<->"
-                                         "<--" "<-<" "<<=" "<<-" "<<<" "<+>" "</>" "###" "#_(" "..<"
-                                         "..." "+++" "/==" "///" "_|_" "www" "&&" "^=" "~~" "~@" "~="
-                                         "~>" "~-" "**" "*>" "*/" "||" "|}" "|]" "|=" "|>" "|-" "{|"
-                                         "[|" "]#" "::" ":=" ":>" ":<" "$>" "==" "=>" "!=" "!!" ">:"
-                                         ">=" ">>" ">-" "-~" "-|" "->" "--" "-<" "<~" "<*" "<|" "<:"
-                                         "<$" "<=" "<>" "<-" "<<" "<+" "</" "#{" "#[" "#:" "#=" "#!"
-                                         "##" "#(" "#?" "#_" "%%" ".=" ".-" ".." ".?" "+>" "++" "?:"
-                                         "?=" "?." "??" ";;" "/*" "/=" "/>" "//" "__" "~~" "(*" "*)"
-                                         "\\\\" "://"))
-    ;; Enables ligature checks globally in all buffers. You can also do it
-    ;; per mode with `ligature-mode'.
-    (global-ligature-mode t))
 #+end_src
 
 * Org Mode
