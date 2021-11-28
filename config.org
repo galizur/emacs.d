@@ -177,7 +177,7 @@ Here are some changed default values, for a better Emacs experience.
 
 ** Better file management with XDG
 
-In order to keep =~/.emacs.d= and =home= folders as clean as possible, we will follow the [[https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html] [XDG base directory specification]]. GNU Emacs won't create the appropriate folders if they do not exist. So we create them ourselves.
+In order to keep =~/.emacs.d= and =home= folders as clean as possible, we will follow the [[https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html][XDG base directory specification]]. GNU Emacs won't create the appropriate folders if they do not exist. So we create them ourselves.
 
 #+begin_src shell
   mkdir ~/.cache/emacs ~/.local/share/emacs/
@@ -196,7 +196,7 @@ In order to keep =~/.emacs.d= and =home= folders as clean as possible, we will f
     "The XDG lib base directory.")
 #+end_src
 
-Some packages implicitly use the [[https://github.com/tkf/emacs-request] [request]] package to make HTTP requests. By default, the data for this package is stored int the GNU Emacs directory. We'll change this value to respect the XDG specifications.
+Some packages implicitly use the [[https://github.com/tkf/emacs-request][request]] package to make HTTP requests. By default, the data for this package is stored int the GNU Emacs directory. We'll change this value to respect the XDG specifications.
 
 #+begin_src emacs-lisp
   (use-package request
@@ -279,7 +279,7 @@ Since GNU Emacs doesn't automatically enable ligatures, we have to enable them o
 
 Using LSP (Language Server Protocol) to configure the management of our programming languages, means that LSP servers can be used by other text editors, increasing the contribution to these packages.
 
-[[https://github.com/emacs-lsp/lsp-mode] [lsp-mode]] can be used with multiple LSP servers, making it perfect for our use.
+[[https://github.com/emacs-lsp/lsp-mode][lsp-mode]] can be used with multiple LSP servers, making it perfect for our use.
 
 #+begin_src emacs-lisp
   (use-package lsp-mode
@@ -310,7 +310,7 @@ When we encounter programming errors, we can use the minibuffer to navigate thro
     :commands (consult-lsp-diagnostics consult-lsp-symbols))
 #+end_src
 
-Finally, we will need a debugger at some point. [[https://github.com/emacs-lsp/dap-mode] [dap-mode]] uses the Debug Adapter Protocol for communication between the client and Debug Server.
+Finally, we will need a debugger at some point. [[https://github.com/emacs-lsp/dap-mode][dap-mode]] uses the Debug Adapter Protocol for communication between the client and Debug Server.
 
 #+begin_src emacs-lisp
   (use-package dap-mode
