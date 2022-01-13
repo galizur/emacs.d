@@ -18,3 +18,5 @@ straight/
 *.db
 /lisp/
 /var/
+/eln-cache/
+/network-security.data

@@ -32,7 +32,6 @@
   - [[#grammar-checker][Grammar Checker]]
 - [[#programming-languages-and-tools][Programming Languages and Tools]]
   - [[#bash][Bash]]
-  - [[#c][C++]]
   - [[#cmake][CMake]]
   - [[#csv][CSV]]
   - [[#dart-and-flutter][Dart and Flutter]]
@@ -829,25 +828,6 @@ Having backups of files is always a good idea.
   (use-package sh-script
     :ensure nil
     :hook (after-save . executable-make-buffer-file-executable-if-script-p))
-#+end_src
-
-** C++
-
-#+begin_src emacs-lisp
-  ;; (use-package ccls
-  ;;   :after projectile
-  ;;   :hook ((c-mode c++-mode objc-mode cuda-mode) . lsp-deferred)
-  ;;   :custom
-  ;;   (ccls-args nil)
-  ;;   (ccls-executable (executable-find "ccls"))
-  ;;   (projectile-project-root-files-top-down-recurring
-  ;;    (append '("compile_commands.json" ".ccls")
-  ;;            projectile-project-root-files-top-down-recurring))
-  ;;   :config (add-to-list 'projectile-globally-ignored-directories ".ccls-cache"))
-
-  ;; (use-package google-c-style
-  ;;   :hook (((c-mode c++-mode) . google-set-c-style)
-  ;;          (c-mode-common . google-make-newline-indent)))
 #+end_src
 
 ** CMake
